@@ -4,6 +4,34 @@ type Suggestions = {
 	image?: string
 }[]
 
+export default async (request: Request): Promise<Response> => {
+	const { pathname } = new URL(request.url)
+	const provider = pathname.slice(1, pathname.slice(1).indexOf('/') + 1)
+	const query = pathname.slice(provider.length + 2)
+
+	let result: Suggestions = []
+
+	switch (provider) {
+		case 'duckduckgo':
+			result = await duckduckgo(query)
+			break
+
+		case 'qwant':
+			result = await qwant(query)
+			break
+
+		case 'yahoo':
+			result = await yahoo(query)
+			break
+
+		default:
+			result = []
+			break
+	}
+
+	return Response.json(result)
+}
+
 const API_LIST = {
 	bing: 'https://www.bing.com/AS/Suggestions?mkt=%l&qry=%q&cvid=9ECCF1FD07F64EA48B12A0CE5819B9BC',
 	google: 'https://www.google.com/complete/search?q=%q&hl=%l&cp=2&client=gws-wiz&xssi=t',
@@ -85,32 +113,4 @@ async function yahoo(q: string): Promise<Suggestions> {
 	}
 
 	return []
-}
-
-export default async (request: Request) => {
-	const { pathname } = new URL(request.url)
-	const provider = pathname.slice(1, pathname.slice(1).indexOf('/') + 1)
-	const query = pathname.slice(provider.length + 2)
-
-	let result: Suggestions = []
-
-	switch (provider) {
-		case 'duckduckgo':
-			result = await duckduckgo(query)
-			break
-
-		case 'qwant':
-			result = await qwant(query)
-			break
-
-		case 'yahoo':
-			result = await yahoo(query)
-			break
-
-		default:
-			result = []
-			break
-	}
-
-	return Response.json(result)
 }
