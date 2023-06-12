@@ -12,6 +12,10 @@ export default async (request: Request): Promise<Response> => {
 	let result: Suggestions = []
 
 	switch (provider) {
+		case 'google':
+			result = await google(query)
+			break
+
 		case 'duckduckgo':
 			result = await duckduckgo(query)
 			break
@@ -38,7 +42,7 @@ export default async (request: Request): Promise<Response> => {
 
 const API_LIST = {
 	bing: 'https://www.bing.com/AS/Suggestions?mkt=%l&qry=%q&cvid=9ECCF1FD07F64EA48B12A0CE5819B9BC',
-	google: 'https://www.google.com/complete/search?q=%q&hl=%l&cp=2&client=gws-wiz&xssi=t',
+	google: 'https://www.google.com/complete/search?q=%q&hl=%l&client=mobile-gws-wiz-hp',
 	qwant: 'https://api.qwant.com/v3/suggest?q=%q&locale=%l',
 	duckduckgo: 'https://duckduckgo.com/ac/?q=%q&kl=&l',
 	yahoo: 'https://search.yahoo.com/sugg/gossip/gossip-us-fastbreak/?pq=&command=%q&output=sd1',
@@ -69,6 +73,32 @@ function requestProviderAPI(url: string) {
 			}
 		},
 	}
+}
+
+async function google(q: string): Promise<Suggestions> {
+	type GoogleAPI = [[[string, number, number[], { zh: string; zs: string }]]]
+
+	const url = API_LIST.google.replace('%q', q).replace('&hl=%l', '')
+	let text = (await requestProviderAPI(url).text()) ?? ''
+	let json: GoogleAPI
+
+	try {
+		text = text.replace('window.google.ac.h(', '')
+		text = text.slice(0, text.length - 1)
+		json = JSON.parse(text) as GoogleAPI
+
+		if (json) {
+			return json[0].map((item) => ({
+				text: item[0].replace('<b>', '').replace('</b>', ''),
+				desc: item[3]?.zh,
+				image: item[3]?.zs,
+			}))
+		}
+	} catch (_) {
+		console.warn('Failed while parsing Google response')
+	}
+
+	return []
 }
 
 async function startpage(q: string): Promise<Suggestions> {
