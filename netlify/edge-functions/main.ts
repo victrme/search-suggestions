@@ -24,6 +24,10 @@ export default async (request: Request): Promise<Response> => {
 			result = await yahoo(query)
 			break
 
+		case 'startpage':
+			result = await startpage(query)
+			break
+
 		default:
 			result = []
 			break
@@ -38,12 +42,13 @@ const API_LIST = {
 	qwant: 'https://api.qwant.com/v3/suggest?q=%q&locale=%l',
 	duckduckgo: 'https://duckduckgo.com/ac/?q=%q&kl=&l',
 	yahoo: 'https://search.yahoo.com/sugg/gossip/gossip-us-fastbreak/?pq=&command=%q&output=sd1',
-	startpage: 'https://www.startpage.com/suggestions?q=%q&lui=english&sc=i9RGhXphNiwC20',
+	startpage: 'https://www.startpage.com/suggestions?q=%q&sc=i9RGhXphNiwC20',
 }
 
 function requestProviderAPI(url: string) {
 	const r = fetch(url, {
 		headers: {
+			Cookie: 'preferences=date_timeEEEworldN1Ndisable_family_filterEEE0N1Ndisable_open_in_new_windowEEE0N1Nenable_post_methodEEE0N1Nenable_proxy_safety_suggestEEE1N1Nenable_stay_controlEEE1N1Ninstant_answersEEE1N1Nlang_homepageEEEs%2Fdevice%2FenN1NlanguageEEEfrancaisN1Nlanguage_uiEEEenglishN1Nnum_of_resultsEEE10N1Nsearch_results_regionEEEallN1NsuggestionsEEE1N1Nwt_unitEEEcelsius',
 			'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:109.0) Gecko/20100101 Firefox/114.0',
 		},
 	})
@@ -64,6 +69,18 @@ function requestProviderAPI(url: string) {
 			}
 		},
 	}
+}
+
+async function startpage(q: string): Promise<Suggestions> {
+	type StartpageAPI = { suggestions: { text: string }[] }
+
+	const json = await requestProviderAPI(API_LIST.startpage.replace('%q', q)).json<StartpageAPI>()
+
+	if (json) {
+		return json.suggestions.map((item) => item)
+	}
+
+	return []
 }
 
 async function qwant(q: string): Promise<Suggestions> {
