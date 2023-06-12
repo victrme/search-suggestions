@@ -1,19 +1,15 @@
-type Detail = {
-	desc: string
-	image: URL
-}
-
 type Suggestions = {
 	text: string
-	detail?: Detail
+	desc?: string
+	image?: string
 }[]
 
-const providerURLs = {
+const API_LIST = {
 	bing: 'https://www.bing.com/AS/Suggestions?mkt=%l&qry=%q&cvid=9ECCF1FD07F64EA48B12A0CE5819B9BC',
 	google: 'https://www.google.com/complete/search?q=%q&hl=%l&cp=2&client=gws-wiz&xssi=t',
 	qwant: 'https://api.qwant.com/v3/suggest?q=%q&locale=%l',
 	duckduckgo: 'https://duckduckgo.com/ac/?q=%q&kl=&l',
-	yahoo: 'https://search.yahoo.com/sugg/gossip/gossip-us-fastbreak/?command=%q',
+	yahoo: 'https://search.yahoo.com/sugg/gossip/gossip-us-fastbreak/?pq=&command=%q&output=sd1',
 	startpage: 'https://www.startpage.com/suggestions?q=%q&lui=english&sc=i9RGhXphNiwC20',
 }
 
@@ -25,9 +21,9 @@ function requestProviderAPI(url: string) {
 	})
 
 	return {
-		json: async (): Promise<unknown | undefined> => {
+		json: async <API>(): Promise<API | undefined> => {
 			try {
-				return await (await r).json()
+				return (await (await r).json()) as API
 			} catch (_) {
 				console.warn("Can't parse JSON")
 			}
@@ -51,11 +47,11 @@ async function qwant(q: string): Promise<Suggestions> {
 		}
 	}
 
-	const url = providerURLs.qwant.replace('%q', q).replace('&locale=%l', '')
-	const json = await requestProviderAPI(url).json()
+	const url = API_LIST.qwant.replace('%q', q).replace('&locale=%l', '')
+	const json = await requestProviderAPI(url).json<QwantAPI>()
 
-	if (json && (json as QwantAPI).status === 'success') {
-		return (json as QwantAPI).data.items.map((item) => ({ text: item.value }))
+	if (json && json.status === 'success') {
+		return json.data.items.map((item) => ({ text: item.value }))
 	}
 
 	return []
@@ -64,11 +60,28 @@ async function qwant(q: string): Promise<Suggestions> {
 async function duckduckgo(q: string): Promise<Suggestions> {
 	type DuckduckgoAPI = { phrase: string }[]
 
-	const url = providerURLs.duckduckgo.replace('%q', q)
-	const json = await requestProviderAPI(url).json()
+	const url = API_LIST.duckduckgo.replace('%q', q)
+	const json = await requestProviderAPI(url).json<DuckduckgoAPI>()
 
 	if (json) {
-		return Object.values(json as DuckduckgoAPI).map((item) => ({ text: item.phrase }))
+		return Object.values(json).map((item) => ({ text: item.phrase }))
+	}
+
+	return []
+}
+
+async function yahoo(q: string): Promise<Suggestions> {
+	type YahooAPI = {
+		r: { k: string; fd?: { imageUrl: string } }[]
+	}
+
+	const json = await requestProviderAPI(API_LIST.yahoo.replace('%q', q)).json<YahooAPI>()
+
+	if (json) {
+		return json.r.map((item) => ({
+			text: item.k,
+			image: item.fd?.imageUrl,
+		}))
 	}
 
 	return []
@@ -88,6 +101,10 @@ export default async (request: Request) => {
 
 		case 'qwant':
 			result = await qwant(query)
+			break
+
+		case 'yahoo':
+			result = await yahoo(query)
 			break
 
 		default:
