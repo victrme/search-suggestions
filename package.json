@@ -1,0 +1,18 @@
+{
+	"name": "search-suggestions",
+	"description": "Gets search suggestions from a number of search engines",
+	"version": "1.0.0",
+	"scripts": {},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/netlify/search-suggestions.git"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "MIT",
+	"bugs": {
+		"url": "https://github.com/netlify/search-suggestions/issues"
+	},
+	"homepage": "https://github.com/netlify/search-suggestions#readme",
+	"dependencies": {}
+}
