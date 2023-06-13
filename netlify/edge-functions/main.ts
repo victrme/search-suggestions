@@ -6,10 +6,26 @@ type Suggestions = {
 	image?: string
 }[]
 
+const API_LIST = {
+	bing: 'https://www.bing.com/AS/Suggestions?qry=%q&cvid=9ECCF1FD07F64EA48B12A0CE5819B9BC',
+	google: 'https://www.google.com/complete/search?q=%q&hl=en&client=mobile-gws-wiz-hp',
+	qwant: 'https://api.qwant.com/v3/suggest?q=%q&locale=%l',
+	duckduckgo: 'https://duckduckgo.com/ac/?q=%q&kl=&l',
+	yahoo: 'https://search.yahoo.com/sugg/gossip/gossip-us-fastbreak/?pq=&command=%q&output=sd1',
+	startpage: 'https://www.startpage.com/suggestions?q=%q&lui=%l&sc=i9RGhXphNiwC20',
+}
+
+const headers = {
+	'Accept-Language': 'en;q=0.5',
+	'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:109.0) Gecko/20100101 Firefox/114.0',
+}
+
 export default async (request: Request): Promise<Response> => {
 	const { pathname } = new URL(request.url)
 	const provider = pathname.slice(1, pathname.slice(1).indexOf('/') + 1)
 	const query = pathname.slice(provider.length + 2)
+
+	// headers['Accept-Language'] = 'pt-BR;q=1;fr-FR,fr;q=0.9;'
 
 	let result: Suggestions = []
 
@@ -46,22 +62,8 @@ export default async (request: Request): Promise<Response> => {
 	return Response.json(result)
 }
 
-const API_LIST = {
-	bing: 'https://www.bing.com/AS/Suggestions?mkt=%l&qry=%q&cvid=9ECCF1FD07F64EA48B12A0CE5819B9BC',
-	google: 'https://www.google.com/complete/search?q=%q&hl=%l&client=mobile-gws-wiz-hp',
-	qwant: 'https://api.qwant.com/v3/suggest?q=%q&locale=%l',
-	duckduckgo: 'https://duckduckgo.com/ac/?q=%q&kl=&l',
-	yahoo: 'https://search.yahoo.com/sugg/gossip/gossip-us-fastbreak/?pq=&command=%q&output=sd1',
-	startpage: 'https://www.startpage.com/suggestions?q=%q&sc=i9RGhXphNiwC20',
-}
-
 function requestProviderAPI(url: string) {
-	const r = fetch(url, {
-		headers: {
-			Cookie: 'preferences=date_timeEEEworldN1Ndisable_family_filterEEE0N1Ndisable_open_in_new_windowEEE0N1Nenable_post_methodEEE0N1Nenable_proxy_safety_suggestEEE1N1Nenable_stay_controlEEE1N1Ninstant_answersEEE1N1Nlang_homepageEEEs%2Fdevice%2FenN1NlanguageEEEfrancaisN1Nlanguage_uiEEEenglishN1Nnum_of_resultsEEE10N1Nsearch_results_regionEEEallN1NsuggestionsEEE1N1Nwt_unitEEEcelsius',
-			'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:109.0) Gecko/20100101 Firefox/114.0',
-		},
-	})
+	const r = fetch(url, { headers })
 
 	return {
 		json: async <API>(): Promise<API | undefined> => {
@@ -82,7 +84,7 @@ function requestProviderAPI(url: string) {
 }
 
 async function google(q: string): Promise<Suggestions> {
-	type GoogleAPI = [[[string, number, number[], { zh: string; zs: string }]]]
+	type GoogleAPI = [[[string, number, number[], { zi: string; zs: string }]]]
 
 	const url = API_LIST.google.replace('%q', q).replace('&hl=%l', '')
 	let text = (await requestProviderAPI(url).text()) ?? ''
@@ -96,7 +98,7 @@ async function google(q: string): Promise<Suggestions> {
 		if (json) {
 			return json[0].map((item) => ({
 				text: item[0].replace('<b>', '').replace('</b>', ''),
-				desc: item[3]?.zh,
+				desc: item[3]?.zi,
 				image: item[3]?.zs,
 			}))
 		}
@@ -120,8 +122,10 @@ async function bing(q: string): Promise<Suggestions> {
 			const imgdom = (item as Element).querySelector('img')
 			const descdom = (item as Element).querySelector('.b_vPanel span')
 
+			const desc = descdom?.textContent ?? ''
+
 			result.push({
-				text: item.textContent,
+				text: item.textContent.replace(desc, ''),
 				desc: descdom ? descdom?.textContent ?? '' : undefined,
 				image: imgdom ? imgdom.getAttribute('src') ?? '' : undefined,
 			})
