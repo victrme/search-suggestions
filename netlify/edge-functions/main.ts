@@ -7,16 +7,16 @@ type Suggestions = {
 }[]
 
 const API_LIST = {
-	bing: 'https://www.bing.com/AS/Suggestions?qry=%q&cvid=9ECCF1FD07F64EA48B12A0CE5819B9BC',
+	bing: 'https://www.bing.com/AS/Suggestions?qry=%q&mkt=%l&cvid=9ECCF1FD07F64EA48B12A0CE5819B9BC',
 	google: 'https://www.google.com/complete/search?q=%q&hl=%l&client=gws-wiz',
 	qwant: 'https://api.qwant.com/v3/suggest?q=%q&locale=%l',
-	duckduckgo: 'https://duckduckgo.com/ac/?q=%q&kl=&l',
-	yahoo: 'https://search.yahoo.com/sugg/gossip/gossip-us-fastbreak/?pq=&command=%q&output=sd1',
-	startpage: 'https://www.startpage.com/suggestions?q=%q&lui=%l&sc=i9RGhXphNiwC20',
+	duckduckgo: 'https://duckduckgo.com/ac/?q=%q&kl=%l',
+	yahoo: 'https://search.yahoo.com/sugg/gossip/gossip-us-fastbreak/?command=%q&output=sd1',
+	startpage: 'https://www.startpage.com/suggestions?q=%q&sc=i9RGhXphNiwC20',
 }
 
 const headers = {
-	'Accept-Language': 'en;q=0.5',
+	'Accept-Language': 'en-US,en;q=1',
 	'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:109.0) Gecko/20100101 Firefox/114.0',
 }
 
@@ -27,9 +27,7 @@ export default async (request: Request): Promise<Response> => {
 	const lang = cat[2]
 	const query = pathname.slice(lang.length + provider.length + 3) //pathname.slice(provider.length + 2)
 
-	headers['Accept-Language'] = lang + ';q=1;fr-FR,fr;q=0.9;'
-
-	console.log(provider, lang, query)
+	headers['Accept-Language'] = lang + ';q=0.9'
 
 	let result: Suggestions = []
 
@@ -39,15 +37,15 @@ export default async (request: Request): Promise<Response> => {
 			break
 
 		case 'bing':
-			result = await bing(query)
+			result = await bing(query, lang)
 			break
 
 		case 'duckduckgo':
-			result = await duckduckgo(query)
+			result = await duckduckgo(query, lang)
 			break
 
 		case 'qwant':
-			result = await qwant(query)
+			result = await qwant(query, lang)
 			break
 
 		case 'yahoo':
@@ -117,8 +115,10 @@ async function google(q: string, lang: string): Promise<Suggestions> {
 	return []
 }
 
-async function bing(q: string): Promise<Suggestions> {
-	const url = API_LIST.bing.replace('%q', q).replace('mkt=%l&', '')
+async function bing(q: string, lang: string): Promise<Suggestions> {
+	lang = lang.includes('-') ? lang : lang + '-' + lang
+
+	const url = API_LIST.bing.replace('%q', q).replace('%l', lang)
 	const text = (await requestProviderAPI(url).text()) ?? ''
 	const result: Suggestions = []
 
@@ -159,7 +159,7 @@ async function startpage(q: string): Promise<Suggestions> {
 	return []
 }
 
-async function qwant(q: string): Promise<Suggestions> {
+async function qwant(q: string, lang: string): Promise<Suggestions> {
 	type QwantAPI = {
 		status: string
 		data: {
@@ -168,7 +168,10 @@ async function qwant(q: string): Promise<Suggestions> {
 		}
 	}
 
-	const url = API_LIST.qwant.replace('%q', q).replace('&locale=%l', '')
+	lang = lang.includes('-') ? lang.replace('-', '_') : lang + '_' + lang
+	lang = lang === 'en_en' ? 'en_US' : lang
+
+	const url = API_LIST.qwant.replace('%q', q).replace('%l', lang)
 	const json = await requestProviderAPI(url).json<QwantAPI>()
 
 	if (json && json.status === 'success') {
@@ -178,10 +181,10 @@ async function qwant(q: string): Promise<Suggestions> {
 	return []
 }
 
-async function duckduckgo(q: string): Promise<Suggestions> {
+async function duckduckgo(q: string, lang: string): Promise<Suggestions> {
 	type DuckduckgoAPI = { phrase: string }[]
 
-	const url = API_LIST.duckduckgo.replace('%q', q)
+	const url = API_LIST.duckduckgo.replace('%q', q).replace('%l', lang)
 	const json = await requestProviderAPI(url).json<DuckduckgoAPI>()
 
 	if (json) {
