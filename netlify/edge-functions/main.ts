@@ -8,7 +8,7 @@ type Suggestions = {
 
 const API_LIST = {
 	bing: 'https://www.bing.com/AS/Suggestions?qry=%q&cvid=9ECCF1FD07F64EA48B12A0CE5819B9BC',
-	google: 'https://www.google.com/complete/search?q=%q&hl=en&client=mobile-gws-wiz-hp',
+	google: 'https://www.google.com/complete/search?q=%q&hl=%l&client=gws-wiz',
 	qwant: 'https://api.qwant.com/v3/suggest?q=%q&locale=%l',
 	duckduckgo: 'https://duckduckgo.com/ac/?q=%q&kl=&l',
 	yahoo: 'https://search.yahoo.com/sugg/gossip/gossip-us-fastbreak/?pq=&command=%q&output=sd1',
@@ -22,16 +22,20 @@ const headers = {
 
 export default async (request: Request): Promise<Response> => {
 	const { pathname } = new URL(request.url)
-	const provider = pathname.slice(1, pathname.slice(1).indexOf('/') + 1)
-	const query = pathname.slice(provider.length + 2)
+	const cat = pathname.split('/')
+	const provider = cat[1] //pathname.slice(1, pathname.slice(1).indexOf('/') + 1)
+	const lang = cat[2]
+	const query = pathname.slice(lang.length + provider.length + 3) //pathname.slice(provider.length + 2)
 
-	// headers['Accept-Language'] = 'pt-BR;q=1;fr-FR,fr;q=0.9;'
+	headers['Accept-Language'] = lang + ';q=1;fr-FR,fr;q=0.9;'
+
+	console.log(provider, lang, query)
 
 	let result: Suggestions = []
 
 	switch (provider) {
 		case 'google':
-			result = await google(query)
+			result = await google(query, lang)
 			break
 
 		case 'bing':
@@ -83,10 +87,10 @@ function requestProviderAPI(url: string) {
 	}
 }
 
-async function google(q: string): Promise<Suggestions> {
+async function google(q: string, lang: string): Promise<Suggestions> {
 	type GoogleAPI = [[[string, number, number[], { zi: string; zs: string }]]]
 
-	const url = API_LIST.google.replace('%q', q).replace('&hl=%l', '')
+	const url = API_LIST.google.replace('%q', q).replace('%l', lang)
 	let text = (await requestProviderAPI(url).text()) ?? ''
 	let json: GoogleAPI
 
