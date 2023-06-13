@@ -63,7 +63,11 @@ export default async (request: Request): Promise<Response> => {
 			break
 	}
 
-	return Response.json(result)
+	return Response.json(result, {
+		headers: {
+			'Access-Control-Allow-Origin': '*',
+		},
+	})
 }
 
 function requestProviderAPI(url: string) {
