@@ -23,9 +23,9 @@ const headers = {
 export default async (request: Request): Promise<Response> => {
 	const { pathname } = new URL(request.url)
 	const cat = pathname.split('/')
-	const provider = cat[1] //pathname.slice(1, pathname.slice(1).indexOf('/') + 1)
+	const provider = cat[1]
 	const lang = cat[2]
-	const query = pathname.slice(lang.length + provider.length + 3) //pathname.slice(provider.length + 2)
+	const query = pathname.slice(lang.length + provider.length + 3)
 
 	headers['Accept-Language'] = lang + ';q=0.9'
 
@@ -103,7 +103,7 @@ async function google(q: string, lang: string): Promise<Suggestions> {
 
 		if (json) {
 			return json[0].map((item) => ({
-				text: item[0].replace('<b>', '').replace('</b>', ''),
+				text: item[0].replaceAll('<b>', '').replaceAll('</b>', ''),
 				desc: item[3]?.zi,
 				image: item[3]?.zs,
 			}))
