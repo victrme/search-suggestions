@@ -1,3 +1,5 @@
+import { DOMParser, Element } from 'https://deno.land/x/deno_dom@v0.1.38/deno-dom-wasm.ts'
+
 type Suggestions = {
 	text: string
 	desc?: string
@@ -14,6 +16,10 @@ export default async (request: Request): Promise<Response> => {
 	switch (provider) {
 		case 'google':
 			result = await google(query)
+			break
+
+		case 'bing':
+			result = await bing(query)
 			break
 
 		case 'duckduckgo':
@@ -96,6 +102,34 @@ async function google(q: string): Promise<Suggestions> {
 		}
 	} catch (_) {
 		console.warn('Failed while parsing Google response')
+	}
+
+	return []
+}
+
+async function bing(q: string): Promise<Suggestions> {
+	const url = API_LIST.bing.replace('%q', q).replace('mkt=%l&', '')
+	const text = (await requestProviderAPI(url).text()) ?? ''
+	const result: Suggestions = []
+
+	try {
+		const document = new DOMParser().parseFromString(text, 'text/html')
+		const items = Object.values(document?.querySelectorAll('ul li') ?? [])
+
+		items.forEach((item) => {
+			const imgdom = (item as Element).querySelector('img')
+			const descdom = (item as Element).querySelector('.b_vPanel span')
+
+			result.push({
+				text: item.textContent,
+				desc: descdom ? descdom?.textContent ?? '' : undefined,
+				image: imgdom ? imgdom.getAttribute('src') ?? '' : undefined,
+			})
+		})
+
+		return result
+	} catch (_) {
+		console.log("Can't parse bing HTML")
 	}
 
 	return []
