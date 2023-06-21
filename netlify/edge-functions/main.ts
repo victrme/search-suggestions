@@ -21,6 +21,13 @@ const headers = {
 }
 
 export default async (request: Request): Promise<Response> => {
+	if (Deno.env.get('AUTHKEY') !== request.headers.get('Authorization')) {
+		return new Response(null, {
+			status: 401,
+			headers,
+		})
+	}
+
 	const { pathname } = new URL(request.url)
 	const cat = pathname.split('/')
 	const provider = cat[1]
