@@ -21,6 +21,18 @@ const headers = {
 }
 
 export default async (request: Request): Promise<Response> => {
+	//
+	if (request.method === 'OPTIONS') {
+		return new Response(null, {
+			status: 200,
+			headers: {
+				'Access-Control-Allow-Origin': '*',
+				'Access-Control-Allow-Methods': 'POST, GET',
+				'Access-Control-Allow-Headers': 'authorization',
+			},
+		})
+	}
+
 	const AUTHKEY = Deno.env.get('AUTHKEY')
 	const Authorization = request.headers.get('Authorization')
 
