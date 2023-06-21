@@ -1,33 +1,34 @@
 # Search Suggestions API
+
 An API that parses search suggestions from a number of search providers. Might not live very long depending on the volatility of their APIs. Here's the list of available search providers:
 
-- Google ( w/ presentations )
-- Yahoo ( w/ presentations )
-- Bing ( w/ presentations )
-- Duckduckgo
-- Qwant
-- Startpage
+-   Google ( w/ presentations )
+-   Yahoo ( w/ presentations )
+-   Bing ( w/ presentations )
+-   Duckduckgo
+-   Qwant
+-   Startpage
 
-Try it here: https://searchsuggestions.netlify.app/duckduckgo/thanks
+Try it here: https://suggestions.deno.dev/
 
 ## How to use
 
 ```HTTP
-GET /provider/query
+GET /provider/lang/query
 ```
 
 ```ts
 type Response = {
   text: string
-  desc?: string   // when presentation is available
-  image?: string  // when presentation is available
+  desc?: string // when presentation is available
+  image?: string // when presentation is available
 }[]
 ```
 
 ## Examples
 
 ```HTTP
-GET /duckduckgo/can we go to
+GET /duckduckgo/en/can we go to
 ```
 
 ```json
@@ -42,26 +43,29 @@ GET /duckduckgo/can we go to
 <br />
 
 ```HTTP
-GET /google/vercel
+GET /google/fr/vercel
 ```
 
 ```json
 [
   {
-    "text": "vercel",
-    "desc": "Vercel",
-    "image": "https://encrypted-tbn0.gstatic.com/image...twA27Zwng&s=10"
-  },
-  {
-    "text": "vercel deutsch"
+    "text": "vercel"
   },
   {
     "text": "vercelli",
-    "desc": "Vercelli",
-    "image": "https://encrypted-tbn0.gstatic.com/image...T6EFkkz_s&s=10"
+    "desc": "Verceil — Ville en Italie",
+    "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQID9TX_tSffwg1RLvecGtuPHMZWbbEOSx0d6_poXT6bqChYkEazWYz6G1ilQ&s=10"
+  },
+  {
+    "text": "vercel villedieu le camp",
+    "desc": "Commune en France",
+    "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQGB1DiSdJxQgJfHphVKCfENgDCeGWobdbBpErowNFfDEExoFTuRmmPfEVJuQ&s=10"
   },
   {
     "text": "vercel pricing"
+  },
+  {
+    "text": "vercel deploy"
   }
 ]
 ```
