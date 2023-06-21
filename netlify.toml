@@ -2,5 +2,5 @@
   autoLaunch = false
 
 [[edge_functions]]
-  path = "/*"
+  path = "/"
   function = "main"
