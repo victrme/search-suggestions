@@ -21,7 +21,12 @@ const headers = {
 }
 
 export default async (request: Request): Promise<Response> => {
-	if (Deno.env.get('AUTHKEY') !== request.headers.get('Authorization')) {
+	const AUTHKEY = Deno.env.get('AUTHKEY')
+	const Authorization = request.headers.get('Authorization')
+
+	console.log(AUTHKEY, Authorization)
+
+	if (AUTHKEY !== Authorization) {
 		return new Response(null, {
 			status: 401,
 			headers,
