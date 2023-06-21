@@ -24,12 +24,10 @@ export default async (request: Request): Promise<Response> => {
 	const AUTHKEY = Deno.env.get('AUTHKEY')
 	const Authorization = request.headers.get('Authorization')
 
-	console.log(AUTHKEY, Authorization)
-
 	if (AUTHKEY !== Authorization) {
-		return new Response(null, {
+		return new Response('Authorization is incorrect: ' + Authorization, {
+			headers: { 'Access-Control-Allow-Origin': '*' },
 			status: 401,
-			headers,
 		})
 	}
 
