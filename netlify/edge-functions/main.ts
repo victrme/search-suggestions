@@ -26,6 +26,7 @@ export default async (request: Request): Promise<Response> => {
 		return new Response(null, {
 			status: 200,
 			headers: {
+				'Access-Control-Max-Age': '600',
 				'Access-Control-Allow-Origin': '*',
 				'Access-Control-Allow-Methods': 'POST, GET',
 				'Access-Control-Allow-Headers': 'authorization',
