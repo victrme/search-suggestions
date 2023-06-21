@@ -3,6 +3,7 @@ An API that parses search suggestions from a number of search providers. Might n
 
 - Google ( w/ presentations )
 - Yahoo ( w/ presentations )
+- Bing ( w/ presentations )
 - Duckduckgo
 - Qwant
 - Startpage
