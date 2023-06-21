@@ -13,10 +13,28 @@ Try it here: https://suggestions.deno.dev/
 
 ## How to use
 
+#### Endpoint
 ```HTTP
-GET /provider/lang/query
+POST /
 ```
 
+#### Body
+```json
+{
+  "lang": "",
+  "query": "",
+  "provider": ""
+}
+```
+
+#### Headers
+```json
+  {
+    "Authorization": "YOUR_AUTH_KEY"
+  }
+```
+
+#### Response
 ```ts
 type Response = {
   text: string
@@ -27,8 +45,12 @@ type Response = {
 
 ## Examples
 
-```HTTP
-GET /duckduckgo/en/can we go to
+```json
+{
+  "lang": "en",
+  "query": "can we go to",
+  "provider": "duckduckgo"
+}
 ```
 
 ```json
@@ -42,8 +64,12 @@ GET /duckduckgo/en/can we go to
 
 <br />
 
-```HTTP
-GET /google/fr/vercel
+```json
+{
+  "lang": "fr",
+  "query": "vercel",
+  "provider": "google"
+}
 ```
 
 ```json
