@@ -50,3 +50,26 @@ export default async (request: Request): Promise<Response> => {
 		},
 	})
 }
+
+// import { DOMParser, Element } from 'https://deno.land/x/deno_dom@v0.1.38/deno-dom-wasm.ts'
+// try {
+// 	const document = new DOMParser().parseFromString(text, 'text/html')
+// 	const items = Object.values(document?.querySelectorAll('ul li') ?? [])
+
+// 	items.forEach((item) => {
+// 		const imgdom = (item as Element).querySelector('img')
+// 		const descdom = (item as Element).querySelector('.b_vPanel span')
+
+// 		const desc = descdom?.textContent ?? ''
+
+// 		result.push({
+// 			text: item.textContent.replace(desc, ''),
+// 			desc: descdom ? descdom?.textContent ?? '' : undefined,
+// 			image: imgdom ? imgdom.getAttribute('src') ?? '' : undefined,
+// 		})
+// 	})
+
+// 	return result
+// } catch (_) {
+// 	console.log("Can't parse bing HTML")
+// }

@@ -116,29 +116,40 @@ async function bing(q: string, lang: string): Promise<Suggestions> {
 	const text = (await requestProviderAPI(url).text()) ?? ''
 	const result: Suggestions = []
 
-	// try {
-	// 	const document = new DOMParser().parseFromString(text, 'text/html')
-	// 	const items = Object.values(document?.querySelectorAll('ul li') ?? [])
+	const elements = text.split('<li class="')
+	elements.shift()
 
-	// 	items.forEach((item) => {
-	// 		const imgdom = (item as Element).querySelector('img')
-	// 		const descdom = (item as Element).querySelector('.b_vPanel span')
+	for (const el of elements) {
+		let text = ''
+		let desc = ''
+		let image = ''
 
-	// 		const desc = descdom?.textContent ?? ''
+		if (el.startsWith('pp_tile')) {
+			const imgstart = el.indexOf('<img height="32" width="32" src="') + 33
+			const imgend = el.indexOf('" role="presentation"/></div>')
+			const txtstart = el.indexOf('<div class="pp_title">') + 22
+			const txtend = el.indexOf('</div><span class="b_demoteText')
+			const descstart = el.indexOf('data-appLinkHookId="demoteText">') + 32
+			const descend = el.indexOf('</span></div>')
 
-	// 		result.push({
-	// 			text: item.textContent.replace(desc, ''),
-	// 			desc: descdom ? descdom?.textContent ?? '' : undefined,
-	// 			image: imgdom ? imgdom.getAttribute('src') ?? '' : undefined,
-	// 		})
-	// 	})
+			image = el.slice(imgstart, imgend)
+			text = el.slice(txtstart, txtend)
+			desc = el.slice(descstart, descend)
+		}
 
-	// 	return result
-	// } catch (_) {
-	// 	console.log("Can't parse bing HTML")
-	// }
+		if (el.startsWith('sa_sg')) {
+			const start = el.indexOf('sa_tm_text">') + 12
+			const end = el.indexOf('</span>')
+			text = el.slice(start, end)
+		}
 
-	return []
+		text = text.replace('<strong>', '')
+		text = text.replace('</strong>', '')
+
+		result.push({ text, desc, image })
+	}
+
+	return result
 }
 
 async function startpage(q: string): Promise<Suggestions> {
