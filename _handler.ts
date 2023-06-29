@@ -24,7 +24,11 @@ const headers = {
 	'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:109.0) Gecko/20100101 Firefox/114.0',
 }
 
-export default async function handler({ lang, query, provider }: HandlerProps): Promise<Suggestions> {
+export default async function handler(requestURL: string): Promise<Suggestions> {
+	const { searchParams } = new URL(requestURL)
+	const provider = searchParams.get('with') ?? 'duckduckgo'
+	const lang = searchParams.get('l') ?? 'en'
+	const query = searchParams.get('q') ?? ''
 	let result: Suggestions = []
 
 	headers['Accept-Language'] = lang + ';q=0.9'
