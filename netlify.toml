@@ -3,4 +3,4 @@
 
 [[edge_functions]]
   path = "/"
-  function = "main"
+  function = "netlify"

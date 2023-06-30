@@ -1,3 +1,4 @@
 .env
 .netlify
 /target
+/node_modules

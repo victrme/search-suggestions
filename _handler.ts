@@ -1,5 +1,3 @@
-import { DOMParser, Element } from 'https://deno.land/x/deno_dom@v0.1.38/deno-dom-wasm.ts'
-
 type Suggestions = {
 	text: string
 	desc?: string
@@ -12,7 +10,7 @@ const API_LIST = {
 	qwant: 'https://api.qwant.com/v3/suggest?q=%q&locale=%l',
 	duckduckgo: 'https://duckduckgo.com/ac/?q=%q&kl=%l',
 	yahoo: 'https://search.yahoo.com/sugg/gossip/gossip-us-fastbreak/?command=%q&output=sd1',
-	startpage: 'https://www.startpage.com/suggestions?q=%q&sc=i9RGhXphNiwC20',
+	startpage: 'https://www.startpage.com/suggestions?q=%q&sc=',
 }
 
 const headers = {
@@ -20,46 +18,11 @@ const headers = {
 	'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:109.0) Gecko/20100101 Firefox/114.0',
 }
 
-export default async (request: Request): Promise<Response> => {
-	const Authorization = request.headers.get('Authorization')
-	const AUTHKEY = Deno.env.get('AUTHKEY')
-	let json = { lang: '', query: '', provider: '' }
-
-	if (request.method === 'OPTIONS') {
-		return new Response(null, {
-			status: 200,
-			headers: {
-				'Access-Control-Max-Age': '86400',
-				'Access-Control-Allow-Origin': '*',
-				'Access-Control-Allow-Methods': 'POST',
-				'Access-Control-Allow-Headers': 'authorization',
-			},
-		})
-	}
-
-	if (AUTHKEY !== Authorization) {
-		return new Response(JSON.stringify({ error: 'Authorization is incorrect: ' + Authorization }), {
-			headers: {
-				'Content-Type': 'application/json',
-				'Access-Control-Allow-Origin': '*',
-			},
-			status: 401,
-		})
-	}
-
-	try {
-		json = await request.json()
-	} catch (_) {
-		return new Response(JSON.stringify({ error: 'Cannot parse request' }), {
-			headers: {
-				'Content-Type': 'application/json',
-				'Access-Control-Allow-Origin': '*',
-			},
-			status: 500,
-		})
-	}
-
-	const { lang, query, provider } = json
+export default async function handler(requestURL: string): Promise<Suggestions> {
+	const { searchParams } = new URL(requestURL)
+	const provider = searchParams.get('with') ?? 'duckduckgo'
+	const lang = searchParams.get('l') ?? 'en'
+	const query = searchParams.get('q') ?? ''
 	let result: Suggestions = []
 
 	headers['Accept-Language'] = lang + ';q=0.9'
@@ -94,12 +57,7 @@ export default async (request: Request): Promise<Response> => {
 			break
 	}
 
-	return Response.json(result, {
-		headers: {
-			'Content-Type': 'application/json',
-			'Access-Control-Allow-Origin': '*',
-		},
-	})
+	return result
 }
 
 function requestProviderAPI(url: string) {
@@ -156,33 +114,47 @@ async function bing(q: string, lang: string): Promise<Suggestions> {
 	const text = (await requestProviderAPI(url).text()) ?? ''
 	const result: Suggestions = []
 
-	try {
-		const document = new DOMParser().parseFromString(text, 'text/html')
-		const items = Object.values(document?.querySelectorAll('ul li') ?? [])
+	const elements = text.split('<li class="')
+	elements.shift()
 
-		items.forEach((item) => {
-			const imgdom = (item as Element).querySelector('img')
-			const descdom = (item as Element).querySelector('.b_vPanel span')
+	for (const el of elements) {
+		let text = ''
+		let desc = ''
+		let image = ''
 
-			const desc = descdom?.textContent ?? ''
+		if (el.startsWith('pp_tile')) {
+			const imgstart = el.indexOf('<img height="32" width="32" src="') + 33
+			const imgend = el.indexOf('" role="presentation"/></div>')
+			const txtstart = el.indexOf('<div class="pp_title">') + 22
+			const txtend = el.indexOf('</div><span class="b_demoteText')
+			const descstart = el.indexOf('data-appLinkHookId="demoteText">') + 32
+			const descend = el.indexOf('</span></div>')
 
-			result.push({
-				text: item.textContent.replace(desc, ''),
-				desc: descdom ? descdom?.textContent ?? '' : undefined,
-				image: imgdom ? imgdom.getAttribute('src') ?? '' : undefined,
-			})
-		})
+			image = el.slice(imgstart, imgend)
+			text = el.slice(txtstart, txtend)
+			desc = el.slice(descstart, descend)
+		}
 
-		return result
-	} catch (_) {
-		console.log("Can't parse bing HTML")
+		if (el.startsWith('sa_sg')) {
+			const start = el.indexOf('sa_tm_text">') + 12
+			const end = el.indexOf('</span>')
+			text = el.slice(start, end)
+		}
+
+		text = text.replace('<strong>', '')
+		text = text.replace('</strong>', '')
+
+		result.push({ text, desc, image })
 	}
 
-	return []
+	return result
 }
 
 async function startpage(q: string): Promise<Suggestions> {
 	type StartpageAPI = { suggestions: { text: string }[] }
+
+	// ...find way to get search token
+	// like this one: QFGfv5rfo2Ln20
 
 	const json = await requestProviderAPI(API_LIST.startpage.replace('%q', q)).json<StartpageAPI>()
 

@@ -1,18 +1,21 @@
 {
 	"name": "search-suggestions",
 	"description": "Gets search suggestions from a number of search engines",
-	"version": "1.0.0",
+	"version": "0.1.0",
 	"scripts": {},
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/netlify/search-suggestions.git"
+		"url": "git+https://github.com/victrme/search-suggestions.git"
 	},
 	"keywords": [],
 	"author": "",
 	"license": "MIT",
 	"bugs": {
-		"url": "https://github.com/netlify/search-suggestions/issues"
+		"url": "https://github.com/victrme/search-suggestions/issues"
 	},
-	"homepage": "https://github.com/netlify/search-suggestions#readme",
-	"dependencies": {}
+	"homepage": "https://github.com/victrme/search-suggestions#readme",
+	"dependencies": {},
+	"devDependencies": {
+		"@cloudflare/workers-types": "^4.20230518.0"
+	}
 }
