@@ -19,7 +19,15 @@ const headers = {
 }
 
 export default async function handler(requestURL: string): Promise<Suggestions> {
-	const { searchParams } = new URL(requestURL)
+	let searchParams: URL['searchParams']
+
+	try {
+		searchParams = new URL(requestURL).searchParams
+	} catch (error) {
+		console.warn('Request URL is not valid')
+		return []
+	}
+
 	const provider = searchParams.get('with') ?? 'duckduckgo'
 	const lang = searchParams.get('l') ?? 'en'
 	const query = searchParams.get('q') ?? ''
@@ -109,6 +117,20 @@ async function google(q: string, lang: string): Promise<Suggestions> {
 
 async function bing(q: string, lang: string): Promise<Suggestions> {
 	lang = lang.includes('-') ? lang : lang + '-' + lang
+	let decode: he.Decode | undefined
+	let DOMParser: unknown
+
+	try {
+		//@ts-ignore
+		DOMParser = (await import('https://deno.land/x/deno_dom@v0.1.38/deno-dom-wasm.ts')).DOMParser
+	} catch (_) {}
+	try {
+		decode = (await import('he')).decode
+	} catch (_) {}
+
+	if (!decode) {
+		return []
+	}
 
 	const url = API_LIST.bing.replace('%q', q).replace('%l', lang)
 	const text = (await requestProviderAPI(url).text()) ?? ''
@@ -119,8 +141,8 @@ async function bing(q: string, lang: string): Promise<Suggestions> {
 
 	for (const el of elements) {
 		let text = ''
-		let desc = ''
-		let image = ''
+		let desc
+		let image
 
 		if (el.startsWith('pp_tile')) {
 			const imgstart = el.indexOf('<img height="32" width="32" src="') + 33
@@ -131,8 +153,8 @@ async function bing(q: string, lang: string): Promise<Suggestions> {
 			const descend = el.indexOf('</span></div>')
 
 			image = el.slice(imgstart, imgend)
-			text = el.slice(txtstart, txtend)
-			desc = el.slice(descstart, descend)
+			text = decode(el.slice(txtstart, txtend))
+			desc = decode(el.slice(descstart, descend))
 		}
 
 		if (el.startsWith('sa_sg')) {
@@ -174,8 +196,7 @@ async function qwant(q: string, lang: string): Promise<Suggestions> {
 		}
 	}
 
-	lang = lang.includes('-') ? lang.replace('-', '_') : lang + '_' + lang
-	lang = lang === 'en_en' ? 'en_US' : lang
+	lang = lang === 'fr' ? 'fr' : 'en_US'
 
 	const url = API_LIST.qwant.replace('%q', q).replace('%l', lang)
 	const json = await requestProviderAPI(url).json<QwantAPI>()
