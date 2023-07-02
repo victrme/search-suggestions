@@ -1,5 +1,10 @@
-import Suggestions from '../types/suggestions'
 import handler from './handler'
+
+type Suggestions = {
+	text: string
+	desc?: string
+	image?: string
+}[]
 
 const providers = ['google', 'bing', 'yahoo', 'duckduckgo', 'qwant']
 

@@ -1,4 +1,8 @@
-import Suggestions from '../types/suggestions'
+type Suggestions = {
+	text: string
+	desc?: string
+	image?: string
+}[]
 
 const API_LIST = {
 	bing: 'https://www.bing.com/AS/Suggestions?qry=%q&mkt=%l&cvid=9ECCF1FD07F64EA48B12A0CE5819B9BC',
