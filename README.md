@@ -1,3 +1,5 @@
+[![Netlify Status](https://api.netlify.com/api/v1/badges/2476474f-17f1-4c71-844f-2a1a3fc75496/deploy-status)](https://app.netlify.com/sites/searchsuggestions/deploys)
+
 # Search Suggestions API
 
 An API that parses search suggestions from a number of search providers. Might not live very long depending on the volatility of their APIs. Here's the list of available search providers:
@@ -7,7 +9,6 @@ An API that parses search suggestions from a number of search providers. Might n
 -   Bing ( w/ presentations )
 -   Duckduckgo
 -   Qwant
--   Startpage
 
 Try it here: https://suggestions.deno.dev/
 
@@ -15,17 +16,14 @@ Try it here: https://suggestions.deno.dev/
 
 #### Endpoint
 ```HTTP
-POST /
+GET /
 ```
 
-#### Body
-```json
-{
-  "lang": "",
-  "query": "",
-  "provider": ""
-}
-```
+| Parameter | Role            | Requirement |
+|-----------|-----------------|-------------|
+| `q`       | Search query    | required    |
+| `l`       | Localization    | optional    |
+| `with`    | Search provider | optional    |
 
 #### Headers
 ```json
@@ -45,12 +43,8 @@ type Response = {
 
 ## Examples
 
-```json
-{
-  "lang": "en",
-  "query": "can we go to",
-  "provider": "duckduckgo"
-}
+```HTTP
+GET /?q=can%20we%20go%20to
 ```
 
 ```json
@@ -64,12 +58,8 @@ type Response = {
 
 <br />
 
-```json
-{
-  "lang": "fr",
-  "query": "vercel",
-  "provider": "google"
-}
+```HTTP
+GET /?with=google&q=vercel&l=fr
 ```
 
 ```json
