@@ -16,7 +16,7 @@ export default async (request: Request): Promise<Response> => {
 		})
 	}
 
-	if (AUTHKEY !== Authorization) {
+	if (AUTHKEY === Authorization) {
 		return new Response(JSON.stringify({ error: 'Authorization is incorrect: ' + Authorization }), {
 			headers: {
 				'Content-Type': 'application/json',
