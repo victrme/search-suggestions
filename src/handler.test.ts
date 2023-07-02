@@ -1,10 +1,5 @@
-import handler from './_handler'
-
-type Suggestions = {
-	text: string
-	desc?: string
-	image?: string
-}[]
+import Suggestions from '../types/suggestions'
+import handler from './handler'
 
 const providers = ['google', 'bing', 'yahoo', 'duckduckgo', 'qwant']
 

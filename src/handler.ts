@@ -1,8 +1,4 @@
-type Suggestions = {
-	text: string
-	desc?: string
-	image?: string
-}[]
+import Suggestions from '../types/suggestions'
 
 const API_LIST = {
 	bing: 'https://www.bing.com/AS/Suggestions?qry=%q&mkt=%l&cvid=9ECCF1FD07F64EA48B12A0CE5819B9BC',
@@ -10,7 +6,6 @@ const API_LIST = {
 	qwant: 'https://api.qwant.com/v3/suggest?q=%q&locale=%l',
 	duckduckgo: 'https://duckduckgo.com/ac/?q=%q&kl=%l',
 	yahoo: 'https://search.yahoo.com/sugg/gossip/gossip-us-fastbreak/?command=%q&output=sd1',
-	startpage: 'https://www.startpage.com/suggestions?q=%q&sc=',
 }
 
 const headers = {
@@ -54,10 +49,6 @@ export default async function handler(requestURL: string): Promise<Suggestions> 
 
 		case 'yahoo':
 			result = await yahoo(query)
-			break
-
-		case 'startpage':
-			result = await startpage(query)
 			break
 
 		default:
@@ -170,21 +161,6 @@ async function bing(q: string, lang: string): Promise<Suggestions> {
 	}
 
 	return result
-}
-
-async function startpage(q: string): Promise<Suggestions> {
-	type StartpageAPI = { suggestions: { text: string }[] }
-
-	// ...find way to get search token
-	// like this one: QFGfv5rfo2Ln20
-
-	const json = await requestProviderAPI(API_LIST.startpage.replace('%q', q)).json<StartpageAPI>()
-
-	if (json) {
-		return json.suggestions.map((item) => item)
-	}
-
-	return []
 }
 
 async function qwant(q: string, lang: string): Promise<Suggestions> {

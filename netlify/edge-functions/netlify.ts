@@ -1,4 +1,4 @@
-import handler from '../../_handler.ts'
+import handler from '../../src/handler.ts'
 
 export default async (request: Request): Promise<Response> => {
 	const Authorization = request.headers.get('Authorization')
