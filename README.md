@@ -1,4 +1,5 @@
 [![Netlify Status](https://api.netlify.com/api/v1/badges/2476474f-17f1-4c71-844f-2a1a3fc75496/deploy-status)](https://app.netlify.com/sites/searchsuggestions/deploys)
+![Static Badge](https://img.shields.io/badge/Cloudflare_Workers-should_work-yellow)
 
 # Search Suggestions API
 
@@ -24,13 +25,6 @@ GET /
 | `q`       | Search query    | required    |
 | `l`       | Localization    | optional    |
 | `with`    | Search provider | optional    |
-
-#### Headers
-```json
-  {
-    "Authorization": "YOUR_AUTH_KEY"
-  }
-```
 
 #### Response
 ```ts
@@ -84,4 +78,32 @@ GET /?with=google&q=vercel&l=fr
     "text": "vercel deploy"
   }
 ]
+```
+
+## Install
+
+First clone this repository
+
+### Netlify
+
+#### Develop
+```bash
+  npm i -g netlify
+  netlify dev
+```
+### Deploy
+Using app.netlify.com dashboard, for conveniance.
+
+### Cloudflare Workers
+
+#### Develop
+```bash
+  npm i -g wrangler
+  wrangler dev
+```
+
+#### Deploy
+```bash
+  wrangler login
+  wrangler deploy
 ```
