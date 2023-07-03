@@ -22,7 +22,7 @@ export default async function handler(requestURL: string): Promise<Suggestions> 
 
 	try {
 		searchParams = new URL(requestURL).searchParams
-	} catch (error) {
+	} catch (_) {
 		console.warn('Request URL is not valid')
 		return []
 	}
@@ -112,20 +112,6 @@ async function google(q: string, lang: string): Promise<Suggestions> {
 
 async function bing(q: string, lang: string): Promise<Suggestions> {
 	lang = lang.includes('-') ? lang : lang + '-' + lang
-	let decode: he.Decode | undefined
-	let DOMParser: unknown
-
-	try {
-		//@ts-ignore
-		DOMParser = (await import('https://deno.land/x/deno_dom@v0.1.38/deno-dom-wasm.ts')).DOMParser
-	} catch (_) {}
-	try {
-		decode = (await import('he')).decode
-	} catch (_) {}
-
-	if (!decode) {
-		return []
-	}
 
 	const url = API_LIST.bing.replace('%q', q).replace('%l', lang)
 	const text = (await requestProviderAPI(url).text()) ?? ''
@@ -135,26 +121,31 @@ async function bing(q: string, lang: string): Promise<Suggestions> {
 	elements.shift()
 
 	for (const el of elements) {
+		const isPresentation = el.indexOf('src="') > 0
 		let text = ''
 		let desc
 		let image
 
-		if (el.startsWith('pp_tile')) {
-			const imgstart = el.indexOf('<img height="32" width="32" src="') + 33
-			const imgend = el.indexOf('" role="presentation"/></div>')
-			const txtstart = el.indexOf('<div class="pp_title">') + 22
-			const txtend = el.indexOf('</div><span class="b_demoteText')
-			const descstart = el.indexOf('data-appLinkHookId="demoteText">') + 32
-			const descend = el.indexOf('</span></div>')
+		if (isPresentation) {
+			const imgstart = el.indexOf('src="') + 5
+			const imgend = el.indexOf('" role=', imgstart)
+			const descstart = el.indexOf('data-appLinkHookId="demoteText">')
 
+			if (descstart > 0) {
+				const descend = el.indexOf('</span>', descstart + 32)
+				desc = el.slice(descstart + 32, descend)
+			}
+
+			const startstr = descstart > 0 ? 'pp_title">' : 'pp_title pp_titleOnly">'
+			const txtstart = el.indexOf(startstr) + startstr.length
+			const txtend = el.indexOf('</div>', txtstart)
+
+			text = el.slice(txtstart, txtend)
 			image = el.slice(imgstart, imgend)
-			text = decode(el.slice(txtstart, txtend))
-			desc = decode(el.slice(descstart, descend))
-		}
-
-		if (el.startsWith('sa_sg')) {
+			//
+		} else {
 			const start = el.indexOf('sa_tm_text">') + 12
-			const end = el.indexOf('</span>')
+			const end = el.indexOf('</span>', start)
 			text = el.slice(start, end)
 		}
 
