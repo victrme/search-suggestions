@@ -142,7 +142,11 @@ async function bing(q: string, lang: string): Promise<Suggestions> {
 
 			text = el.slice(txtstart, txtend)
 			image = el.slice(imgstart, imgend)
-			//
+
+			// cloudflare removes domains when fetching html
+			if (image.startsWith('https://th.bing.com') === false) {
+				image = 'https://th.bing.com' + image
+			}
 		} else {
 			const start = el.indexOf('sa_tm_text">') + 12
 			const end = el.indexOf('</span>', start)

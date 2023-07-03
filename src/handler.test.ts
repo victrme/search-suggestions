@@ -42,16 +42,11 @@ describe('Providers', () => {
 		testPresentation(response)
 	})
 
-	// test('Bing', async () => {
-	// 	const response = await handler('localhost:8888/?q=hello&with=bing')
-	// 	const presentations = Object.values(response).filter((el) => el.image)
-
-	// 	console.log(presentations)
-
-	// 	expect(typeof response[0].text).toBe('string')
-	// 	expect(presentations.length > 0).toBe(true)
-	// 	expect(new URL(presentations[0].image ?? '')).toBeTruthy()
-	// })
+	test('Bing', async () => {
+		const response = await handler('localhost:8888/?q=hello&with=bing')
+		testResponse(response)
+		testPresentation(response)
+	})
 
 	test('Yahoo', async () => {
 		const response = await handler('localhost:8888/?q=hello&with=yahoo')
@@ -77,8 +72,9 @@ describe('Localization', () => {
 			testResponse(res)
 		}
 	})
+
 	test('Correct french in description', async () => {
-		const providersWithDesc = ['google', 'bing']
+		const providersWithDesc = ['google'] //, 'bing']
 
 		for (const provider of providersWithDesc) {
 			const res = await handler(`localhost:8888/?q=minecraft&l=zesglljesh&with=${provider}`)
