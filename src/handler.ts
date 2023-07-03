@@ -113,6 +113,10 @@ async function google(q: string, lang: string): Promise<Suggestions> {
 async function bing(q: string, lang: string): Promise<Suggestions> {
 	lang = lang.includes('-') ? lang : lang + '-' + lang
 
+	if (q.length === 0) {
+		return []
+	}
+
 	const url = API_LIST.bing.replace('%q', q).replace('%l', lang)
 	const text = (await requestProviderAPI(url).text()) ?? ''
 	const result: Suggestions = []
