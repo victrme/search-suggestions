@@ -117,6 +117,15 @@ async function bing(q: string, lang: string): Promise<Suggestions> {
 		return []
 	}
 
+	let decode = (s: string): string => s
+
+	try {
+		const he = await import('he')
+		decode = he.decode
+	} catch (_) {
+		console.warn('he failed to load')
+	}
+
 	const url = API_LIST.bing.replace('%q', q).replace('%l', lang)
 	const text = (await requestProviderAPI(url).text()) ?? ''
 	const result: Suggestions = []
@@ -137,7 +146,7 @@ async function bing(q: string, lang: string): Promise<Suggestions> {
 
 			if (descstart > 0) {
 				const descend = el.indexOf('</span>', descstart + 32)
-				desc = el.slice(descstart + 32, descend)
+				desc = decode(el.slice(descstart + 32, descend))
 			}
 
 			const startstr = descstart > 0 ? 'pp_title">' : 'pp_title pp_titleOnly">'
@@ -157,6 +166,7 @@ async function bing(q: string, lang: string): Promise<Suggestions> {
 			text = el.slice(start, end)
 		}
 
+		text = decode(text)
 		text = text.replace('<strong>', '')
 		text = text.replace('</strong>', '')
 
