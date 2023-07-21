@@ -167,8 +167,8 @@ async function bing(q: string, lang: string): Promise<Suggestions> {
 		}
 
 		text = decode(text)
-		text = text.replace('<strong>', '')
-		text = text.replace('</strong>', '')
+		text = text.replaceAll('<strong>', '')
+		text = text.replaceAll('</strong>', '')
 
 		result.push({ text, desc, image })
 	}
