@@ -99,7 +99,7 @@ async function google(q: string, lang: string): Promise<Suggestions> {
 		if (json) {
 			return json[0].map((item) => ({
 				text: item[0].replaceAll('<b>', '').replaceAll('</b>', '').replaceAll('&#39;', "'"),
-				desc: item[3]?.zi,
+				desc: item[3]?.zi.replaceAll('&#39;', "'"),
 				image: item[3]?.zs,
 			}))
 		}
