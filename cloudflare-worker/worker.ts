@@ -14,24 +14,40 @@ export default {
 
 		server.accept()
 
-		server.addEventListener('message', (event) => {
-			const url = event?.data?.toString() ?? ''
+		server.addEventListener(
+			'message',
+			debounce((event: MessageEvent) => {
+				const url = event.data?.toString() ?? ''
 
-			if (count === 50) {
-				server.close()
-				return
-			}
+				if (count === 50) {
+					server.close()
+					return
+				}
 
-			handler(url).then((response) => {
-				server.send(JSON.stringify(response))
-			})
+				handler(url).then((response) => {
+					server.send(JSON.stringify(response))
+				})
 
-			count++
-		})
+				count++
+			}, 200)
+		)
 
 		return new Response(null, {
 			status: 101,
 			webSocket: client,
 		})
 	},
+}
+
+function debounce(callback: Function, delay: number) {
+	let timer = setTimeout(() => {})
+
+	return function () {
+		clearTimeout(timer)
+
+		timer = setTimeout(() => {
+			console.log('Not skipped')
+			callback(...arguments)
+		}, delay)
+	}
 }
