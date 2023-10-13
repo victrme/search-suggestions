@@ -46,7 +46,6 @@ function debounce(callback: Function, delay: number) {
 		clearTimeout(timer)
 
 		timer = setTimeout(() => {
-			console.log('Not skipped')
 			callback(...arguments)
 		}, delay)
 	}
