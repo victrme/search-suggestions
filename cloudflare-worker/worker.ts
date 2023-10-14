@@ -29,7 +29,7 @@ export default {
 				})
 
 				count++
-			}, 200)
+			}, 150)
 		)
 
 		return new Response(null, {
