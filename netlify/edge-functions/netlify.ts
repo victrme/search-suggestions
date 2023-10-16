@@ -1,4 +1,4 @@
-import handler from '../../src/handler.ts'
+import handler from '../../src/index.ts'
 
 export default async (request: Request): Promise<Response> => {
 	let result: unknown[]

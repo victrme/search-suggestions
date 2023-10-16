@@ -1,4 +1,4 @@
-import handler from '../src/handler'
+import handler from '../src'
 
 let server: WebSocket
 let client: WebSocket

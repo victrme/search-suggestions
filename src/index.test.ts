@@ -1,4 +1,4 @@
-import handler from './handler'
+import handler from './'
 
 type Suggestions = {
 	text: string
