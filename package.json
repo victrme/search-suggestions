@@ -1,5 +1,5 @@
 {
-	"name": "suggestions",
+	"name": "@victr/suggestions",
 	"description": "Gets search suggestions from a number of search engines",
 	"version": "0.2.0",
 	"author": "Victor Azevedo",
