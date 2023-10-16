@@ -2,3 +2,6 @@
 name = "suggestions"
 main = "cloudflare-worker/worker.ts"
 compatibility_date = "2022-07-12"
+
+[placement]
+mode = "smart"
