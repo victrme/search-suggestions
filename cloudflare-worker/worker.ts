@@ -42,9 +42,9 @@ function sendMessage(event: MessageEvent) {
 		const data = JSON.parse(event.data.toString() ?? '{}')
 
 		const response = handler({
-			q: data?.q,
-			with: data?.with,
-			lang: data?.lang,
+			q: data.q ?? '',
+			with: data.with ?? '',
+			lang: data.lang ?? '',
 		})
 
 		response.then((response) => {
