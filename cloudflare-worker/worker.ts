@@ -2,7 +2,6 @@ import handler from '../src'
 
 let server: WebSocket
 let client: WebSocket
-let count = 0
 
 export default {
 	async fetch(request: Request) {
@@ -12,6 +11,7 @@ export default {
 			return new Response('Expected Upgrade: websocket', { status: 426 })
 		}
 
+		let subRequestCount = 0
 		const webSocketPair = new WebSocketPair()
 		client = webSocketPair[0]
 		server = webSocketPair[1]
@@ -21,6 +21,12 @@ export default {
 		server.addEventListener(
 			'message',
 			debounce((ev: MessageEvent) => {
+				if (subRequestCount++ === 50) {
+					subRequestCount = 0
+					server.close()
+					return
+				}
+
 				sendMessage(ev)
 			}, 150)
 		)
@@ -34,11 +40,6 @@ export default {
 
 function sendMessage(event: MessageEvent) {
 	try {
-		if (count === 50) {
-			server.close()
-			return
-		}
-
 		const data = JSON.parse(event.data.toString() ?? '{}')
 
 		const response = handler({
@@ -56,8 +57,6 @@ function sendMessage(event: MessageEvent) {
 		console.error(error)
 		server.send('{error: ' + error + '}')
 	}
-
-	count++
 }
 
 function debounce(callback: Function, delay: number) {
