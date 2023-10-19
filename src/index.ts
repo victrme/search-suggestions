@@ -81,7 +81,8 @@ function requestProviderAPI(url: string) {
 }
 
 async function google(q: string, lang: string): Promise<Suggestions> {
-	type GoogleAPI = [[[string, number, number[], { zi: string; zs: string }]]]
+	type GoogleDefinition = { l: { il: { t: { t: string }[] } }[] }
+	type GoogleAPI = [[[string, number, number[], { zi: string; zs: string; ansa: GoogleDefinition }]]]
 
 	const url = API_LIST.google.replace('%q', q).replace('%l', lang)
 	let text = (await requestProviderAPI(url).text()) ?? ''
@@ -93,11 +94,15 @@ async function google(q: string, lang: string): Promise<Suggestions> {
 		json = JSON.parse(text) as GoogleAPI
 
 		if (json) {
-			return json[0].map((item) => ({
-				text: item[0].replaceAll('<b>', '').replaceAll('</b>', '').replaceAll('&#39;', "'"),
-				desc: item[3]?.zi.replaceAll('&#39;', "'"),
-				image: item[3]?.zs,
-			}))
+			return json[0].map((item) => {
+				const wordDefinition = item[3]?.ansa?.l[1]?.il?.t[0]?.t // bruh
+
+				const text = item[0].replaceAll('<b>', '').replaceAll('</b>', '').replaceAll('&#39;', "'")
+				const desc = (wordDefinition ?? item[3]?.zi ?? '').replaceAll('&#39;', "'")
+				const image = item[3]?.zs
+
+				return { text, image, desc }
+			})
 		}
 	} catch (_) {
 		console.warn('Failed while parsing Google response')
