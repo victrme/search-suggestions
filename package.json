@@ -6,8 +6,7 @@
 	"license": "MIT",
 	"scripts": {
 		"test": "vitest",
-		"build": "tsc src/index.ts --outdir dist/ --module esnext --target esnext --declaration",
-		"publish": "pnpm build && npm publish --access public"
+		"build": "tsc src/index.ts --outdir dist/ --module esnext --target esnext --declaration"
 	},
 	"devDependencies": {
 		"@cloudflare/workers-types": "^4.20231010.0",
