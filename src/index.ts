@@ -1,4 +1,4 @@
-type Suggestions = {
+export type Suggestions = {
 	text: string
 	desc?: string
 	image?: string

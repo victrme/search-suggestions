@@ -1,7 +1,8 @@
+import type { Suggestions } from '../../src/index.ts'
 import handler from '../../src/index.ts'
 
 export default async (request: Request): Promise<Response> => {
-	let result: unknown[]
+	let result: Suggestions
 
 	try {
 		const params = new URL(request.url ?? '').searchParams
