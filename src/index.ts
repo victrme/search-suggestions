@@ -1,8 +1,14 @@
-type Suggestions = {
+export type Suggestions = {
 	text: string
 	desc?: string
 	image?: string
 }[]
+
+const ARGS = {
+	q: '',
+	with: ' ',
+	lang: '',
+}
 
 const API_LIST = {
 	bing: 'https://www.bing.com/AS/Suggestions?qry=%q&mkt=%l&cvid=9ECCF1FD07F64EA48B12A0CE5819B9BC',
@@ -17,42 +23,32 @@ const headers = {
 	'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:109.0) Gecko/20100101 Firefox/114.0',
 }
 
-export default async function handler(requestURL: string): Promise<Suggestions> {
-	let searchParams: URL['searchParams']
-
-	try {
-		searchParams = new URL(requestURL).searchParams
-	} catch (_) {
-		console.warn('Request URL is not valid')
-		return []
-	}
-
-	const provider = searchParams.get('with') ?? 'duckduckgo'
-	const lang = searchParams.get('l') ?? 'en'
-	const query = searchParams.get('q') ?? ''
+export default async function handler(args = ARGS): Promise<Suggestions> {
+	const { q, lang } = args
 	let result: Suggestions = []
 
-	headers['Accept-Language'] = lang + ';q=0.9'
+	headers['Accept-Language'] = args.lang + ';q=0.9'
 
-	switch (provider) {
+	switch (args.with) {
 		case 'google':
-			result = await google(query, lang)
+			result = await google(q, lang)
 			break
 
 		case 'bing':
-			result = await bing(query, lang)
+			result = await bing(q, lang)
 			break
 
+		case 'ddg':
 		case 'duckduckgo':
-			result = await duckduckgo(query, lang)
+			result = await duckduckgo(q, lang)
 			break
 
 		case 'qwant':
-			result = await qwant(query, lang)
+			result = await qwant(q, lang)
 			break
 
 		case 'yahoo':
-			result = await yahoo(query)
+			result = await yahoo(q)
 			break
 
 		default:
@@ -85,7 +81,8 @@ function requestProviderAPI(url: string) {
 }
 
 async function google(q: string, lang: string): Promise<Suggestions> {
-	type GoogleAPI = [[[string, number, number[], { zi: string; zs: string }]]]
+	type GoogleDefinition = { l: { il: { t: { t: string }[] } }[] }
+	type GoogleAPI = [[[string, number, number[], { zi: string; zs: string; ansa: GoogleDefinition }]]]
 
 	const url = API_LIST.google.replace('%q', q).replace('%l', lang)
 	let text = (await requestProviderAPI(url).text()) ?? ''
@@ -97,11 +94,15 @@ async function google(q: string, lang: string): Promise<Suggestions> {
 		json = JSON.parse(text) as GoogleAPI
 
 		if (json) {
-			return json[0].map((item) => ({
-				text: item[0].replaceAll('<b>', '').replaceAll('</b>', '').replaceAll('&#39;', "'"),
-				desc: item[3]?.zi.replaceAll('&#39;', "'"),
-				image: item[3]?.zs,
-			}))
+			return json[0].map((item) => {
+				const wordDefinition = item[3]?.ansa?.l[1]?.il?.t[0]?.t // bruh
+
+				const text = item[0].replaceAll('<b>', '').replaceAll('</b>', '').replaceAll('&#39;', "'")
+				const desc = (wordDefinition ?? item[3]?.zi ?? '').replaceAll('&#39;', "'")
+				const image = item[3]?.zs
+
+				return { text, image, desc }
+			})
 		}
 	} catch (_) {
 		console.warn('Failed while parsing Google response')

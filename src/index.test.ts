@@ -1,4 +1,5 @@
-import handler from './handler'
+import { expect, test, describe } from 'vitest'
+import handler from './'
 
 type Suggestions = {
 	text: string
@@ -19,48 +20,49 @@ function testResponse(response: Suggestions) {
 }
 
 describe('Returns empty array', () => {
-	test('On bad URL', async () => {
-		const response = await handler('hello there/')
+	test('When no parameters', async () => {
+		const response = await handler()
 		expect(JSON.stringify(response)).toBe('[]')
 	})
 
-	test('When no parameters', async () => {
-		const response = await handler('localhost:8888/')
+	test('When undefined params', async () => {
+		//@ts-ignore
+		const response = await handler({ q: undefined, with: undefined, lang: undefined })
 		expect(JSON.stringify(response)).toBe('[]')
 	})
 
 	test('When only provider', async () => {
-		const response = await handler('localhost:8888/?with=duckduckgo')
+		const response = await handler({ q: '', with: 'google', lang: '' })
 		expect(JSON.stringify(response)).toBe('[]')
 	})
 })
 
 describe('Providers', () => {
 	test('Google', async () => {
-		const response = await handler('localhost:8888/?q=hello&with=google')
+		const response = await handler({ q: 'hello', with: 'google', lang: '' })
 		testResponse(response)
 		testPresentation(response)
 	})
 
 	test('Bing', async () => {
-		const response = await handler('localhost:8888/?q=hello&with=bing')
+		const response = await handler({ q: 'hello', with: 'bing', lang: '' })
 		testResponse(response)
 		testPresentation(response)
 	})
 
 	test('Yahoo', async () => {
-		const response = await handler('localhost:8888/?q=hello&with=yahoo')
+		const response = await handler({ q: 'hello', with: 'yahoo', lang: '' })
 		testResponse(response)
 		testPresentation(response)
 	})
 
 	test('Duckduckgo', async () => {
-		const response = await handler('localhost:8888/?q=hello&with=duckduckgo')
+		const response = await handler({ q: 'hello', with: 'ddg', lang: '' })
 		testResponse(response)
 	})
 
 	test('Qwant', async () => {
-		const response = await handler('localhost:8888/?q=hello&with=qwant')
+		const response = await handler({ q: 'hello', with: 'qwant', lang: '' })
 		testResponse(response)
 	})
 })
@@ -68,7 +70,7 @@ describe('Providers', () => {
 describe('Localization', () => {
 	test('Fallback to auto on bad lang parameter', async () => {
 		for (const provider of providers) {
-			const res = await handler(`localhost:8888/?q=minecraft&l=zesglljesh&with=${provider}`)
+			const res = await handler({ q: 'minecraft', lang: 'zesglljesh', with: provider })
 			testResponse(res)
 		}
 	})
@@ -77,7 +79,7 @@ describe('Localization', () => {
 		const providersWithDesc = ['google'] //, 'bing']
 
 		for (const provider of providersWithDesc) {
-			const res = await handler(`localhost:8888/?q=minecraft&l=zesglljesh&with=${provider}`)
+			const res = await handler({ q: 'minecraft', lang: 'zesglljesh', with: provider })
 			const descs = res.map((el) => el.desc).filter((desc) => desc?.includes('Jeu vidéo'))
 
 			expect(descs.length > 0).toBe(true)

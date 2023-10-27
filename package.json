@@ -1,25 +1,36 @@
 {
-	"name": "search-suggestions",
+	"name": "@victr/suggestions",
 	"description": "Gets search suggestions from a number of search engines",
-	"version": "0.1.0",
+	"version": "0.2.2",
+	"author": "Victor Azevedo",
+	"license": "MIT",
 	"scripts": {
-		"test": "jest"
+		"test": "vitest",
+		"build": "tsc src/index.ts --outdir dist/ --module esnext --target esnext --declaration"
+	},
+	"devDependencies": {
+		"@cloudflare/workers-types": "^4.20231010.0",
+		"@types/he": "^1.2.1",
+		"typescript": "^5.2.2",
+		"vitest": "^0.34.6"
+	},
+	"dependencies": {
+		"he": "^1.2.0"
+	},
+	"files": [
+		"/dist"
+	],
+	"type": "module",
+	"exports": {
+		".": {
+			"import": {
+				"types": "./dist/index.d.ts",
+				"default": "./dist/index.js"
+			}
+		}
 	},
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/victrme/search-suggestions.git"
-	},
-	"author": "Victor Azevedo",
-	"license": "MIT",
-	"devDependencies": {
-		"@cloudflare/workers-types": "^4.20230518.0",
-		"@types/he": "^1.2.0",
-		"@types/jest": "^29.5.2",
-		"jest": "^29.5.0",
-		"ts-jest": "^29.1.0",
-		"typescript": "^5.1.6"
-	},
-	"dependencies": {
-		"he": "^1.2.0"
 	}
 }

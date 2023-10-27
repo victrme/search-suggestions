@@ -1,6 +1,3 @@
-[![Netlify Status](https://api.netlify.com/api/v1/badges/2476474f-17f1-4c71-844f-2a1a3fc75496/deploy-status)](https://app.netlify.com/sites/searchsuggestions/deploys)
-![Static Badge](https://img.shields.io/badge/Cloudflare_Workers-should_work-yellow)
-
 # Search Suggestions API
 
 An API that parses search suggestions from a number of search providers. Might not live very long depending on the volatility of their APIs. Here's the list of available search providers:
@@ -34,6 +31,20 @@ type Response = {
   image?: string // when presentation is available
 }[]
 ```
+
+### Websockets
+Using Clouflare workers, you can also get results using websockets.
+
+```js
+const socket = new WebSocket('ws://localhost:8787')
+
+socket.onmessage = function (event: MessageEvent) {
+  console.log(JSON.parse(event.data))
+}
+
+socket.send(JSON.stringify({ q, with, lang }))
+```
+
 
 ## Examples
 
@@ -86,24 +97,20 @@ First clone this repository
 
 ### Netlify
 
-#### Develop
 ```bash
-  npm i -g netlify
-  netlify dev
+npm install netlify-cli -g
+
+# On port 8888
+netlify dev
 ```
-### Deploy
-Using app.netlify.com dashboard, for conveniance.
 
 ### Cloudflare Workers
 
-#### Develop
 ```bash
-  npm i -g wrangler
-  wrangler dev
-```
+npm install wrangler -g
 
-#### Deploy
-```bash
-  wrangler login
-  wrangler deploy
+# On port 8787
+wrangler dev
+
+wrangler deploy
 ```
