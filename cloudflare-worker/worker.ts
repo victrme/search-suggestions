@@ -2,17 +2,15 @@ import handler from '../src'
 
 export default {
 	async fetch(request: Request) {
+		const upgradeHeader = request.headers.get('Upgrade') === 'websocket'
+
 		// When using GET method
-		if (request.method === 'GET') {
+		if (request.method === 'GET' && !upgradeHeader) {
 			return await responseAsHttp(request)
 		}
 
 		// When using WS method
-		if (request.method === 'WS') {
-			if (request.headers.get('Upgrade') !== 'websocket') {
-				return new Response('Expected Upgrade: websocket', { status: 426 })
-			}
-
+		if (request.method === 'WS' || (request.method === 'GET' && upgradeHeader)) {
 			return createWebsocket()
 		}
 
