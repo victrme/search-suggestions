@@ -48,6 +48,7 @@ function createWebsocket() {
 		debounce((ev: MessageEvent) => {
 			if (subRequestCount++ === 50) {
 				subRequestCount = 0
+				server.send(JSON.stringify({ error: 'subrequest limit reached' }))
 				server.close()
 				return
 			}
