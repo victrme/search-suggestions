@@ -9,13 +9,8 @@
 		"build": "tsc src/index.ts --outdir dist/ --module esnext --target esnext --declaration"
 	},
 	"devDependencies": {
-		"@cloudflare/workers-types": "^4.20231025.0",
-		"@types/he": "^1.2.3",
 		"typescript": "^5.2.2",
 		"vitest": "^0.34.6"
-	},
-	"dependencies": {
-		"he": "^1.2.0"
 	},
 	"files": [
 		"/dist"

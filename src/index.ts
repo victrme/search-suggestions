@@ -1,5 +1,3 @@
-// test branch merge
-
 export type Suggestions = {
 	text: string
 	desc?: string
@@ -121,13 +119,6 @@ async function bing(q: string, lang: string): Promise<Suggestions> {
 	}
 
 	let decode = (s: string): string => s
-
-	try {
-		const he = await import('he')
-		decode = he.decode
-	} catch (_) {
-		console.warn('he failed to load')
-	}
 
 	const url = API_LIST.bing.replace('%q', q).replace('%l', lang)
 	const text = (await requestProviderAPI(url).text()) ?? ''
