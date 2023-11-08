@@ -93,7 +93,7 @@ GET /?with=google&q=vercel&l=fr
 
 ## Install
 
-First clone this repository
+First clone this repository.
 
 ### Netlify
 
