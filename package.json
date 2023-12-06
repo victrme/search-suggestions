@@ -7,7 +7,8 @@
 	"scripts": {
 		"test": "vitest",
 		"build": "tsc src/index.ts --outdir dist/ --module esnext --target esnext --declaration",
-		"cloudflare:dev": "pnpm --filter cloudflare dev"
+		"cloudflare:dev": "pnpm --filter cloudflare dev",
+		"netlify:dev": "netlify dev --filter netlify"
 	},
 	"devDependencies": {
 		"typescript": "^5.2.2",
