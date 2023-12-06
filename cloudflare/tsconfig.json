@@ -1,0 +1,9 @@
+{
+	"compilerOptions": {
+		"lib": ["ESNext"],
+		"types": ["@cloudflare/workers-types/2023-07-01"],
+		"moduleResolution": "node",
+		"isolatedModules": true,
+		"allowSyntheticDefaultImports": true
+	}
+}

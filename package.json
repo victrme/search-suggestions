@@ -6,7 +6,8 @@
 	"license": "MIT",
 	"scripts": {
 		"test": "vitest",
-		"build": "tsc src/index.ts --outdir dist/ --module esnext --target esnext --declaration"
+		"build": "tsc src/index.ts --outdir dist/ --module esnext --target esnext --declaration",
+		"cloudflare:dev": "pnpm --filter cloudflare dev"
 	},
 	"devDependencies": {
 		"typescript": "^5.2.2",

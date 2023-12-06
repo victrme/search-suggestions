@@ -1,0 +1,4 @@
+name = "suggestions"
+main = "src/index.ts"
+compatibility_date = "2023-11-21"
+minify = true
