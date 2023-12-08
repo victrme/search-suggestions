@@ -29,6 +29,10 @@ export default async function handler(args = ARGS): Promise<Suggestions> {
 
 	headers['Accept-Language'] = args.lang + ';q=0.9'
 
+	if (q.length === 0) {
+		return []
+	}
+
 	switch (args.with) {
 		case 'google':
 			result = await google(q, lang)
@@ -113,10 +117,6 @@ async function google(q: string, lang: string): Promise<Suggestions> {
 
 async function bing(q: string, lang: string): Promise<Suggestions> {
 	lang = lang.includes('-') ? lang : lang + '-' + lang
-
-	if (q.length === 0) {
-		return []
-	}
 
 	let decode = (s: string): string => s
 
