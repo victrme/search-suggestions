@@ -84,8 +84,8 @@ function createWebsocket() {
 function debounce(callback: Function, delay: number) {
 	let timer = 0
 
-	return function () {
+	return function (...args: unknown[]) {
 		clearTimeout(timer)
-		timer = setTimeout((...args) => callback(...args), delay)
+		timer = setTimeout(() => callback(...args), delay)
 	}
 }
