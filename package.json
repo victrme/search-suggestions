@@ -1,12 +1,12 @@
 {
 	"name": "@victr/suggestions",
 	"description": "Gets search suggestions from a number of search engines",
-	"version": "0.2.2",
+	"version": "0.2.3",
 	"author": "Victor Azevedo",
 	"license": "MIT",
 	"scripts": {
-		"test": "vitest",
-		"build": "tsc src/index.ts --outdir dist/ --module esnext --target esnext --declaration",
+		"test": "vitest --run",
+		"build": "tsc",
 		"cloudflare:dev": "pnpm --filter cloudflare dev",
 		"netlify:dev": "netlify dev --filter netlify"
 	},
