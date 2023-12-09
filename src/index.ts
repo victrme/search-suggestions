@@ -27,9 +27,9 @@ export default async function handler(args = ARGS): Promise<Suggestions> {
 	const { q, lang } = args
 	let result: Suggestions = []
 
-	headers['Accept-Language'] = args.lang + ';q=0.9'
+	headers['Accept-Language'] = (args?.lang ?? 'en-US') + ';q=0.9'
 
-	if (q.length === 0) {
+	if (!q || q.length === 0) {
 		return []
 	}
 
