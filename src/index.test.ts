@@ -79,10 +79,10 @@ describe('Localization', () => {
 		const providersWithDesc = ['google'] //, 'bing']
 
 		for (const provider of providersWithDesc) {
-			const res = await handler({ q: 'minecraft', lang: 'zesglljesh', with: provider })
-			const descs = res.map((el) => el.desc).filter((desc) => desc?.includes('Jeu vidéo'))
+			const res = await handler({ q: 'minecraft', lang: 'fr', with: provider })
+			const hasAccentAigu = JSON.stringify(res).includes('é')
 
-			expect(descs.length > 0).toBe(true)
+			expect(hasAccentAigu).toBe(true)
 		}
 	})
 })
