@@ -8,7 +8,7 @@ An API that parses search suggestions from a number of search providers. Might n
 -   Duckduckgo
 -   Qwant
 
-Try it here: https://suggestions.deno.dev/
+Try it here: https://suggestions.victr.me/
 
 ## How to use
 
