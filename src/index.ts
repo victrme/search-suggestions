@@ -11,7 +11,7 @@ const ARGS = {
 }
 
 const API_LIST = {
-	bing: 'https://www.bing.com/AS/Suggestions?qry=%q&mkt=%l&cvid=9ECCF1FD07F64EA48B12A0CE5819B9BC',
+	bing: 'https://www.bing.com/AS/Suggestions?qry=%q&mkt=%l&cp=5&csr=1&msbqf=false&cvid=7AE3B40123C74FFF87EF8A5ED4FAF455',
 	google: 'https://www.google.com/complete/search?q=%q&hl=%l&client=gws-wiz',
 	qwant: 'https://api.qwant.com/v3/suggest?q=%q&locale=%l',
 	duckduckgo: 'https://duckduckgo.com/ac/?q=%q&kl=%l',
@@ -116,55 +116,25 @@ async function google(q: string, lang: string): Promise<Suggestions> {
 }
 
 async function bing(q: string, lang: string): Promise<Suggestions> {
+	type BingSuggestions = { q: string; u: string; ext?: { des: string; im: string; t: string } }
+	type Bing = { s: BingSuggestions[] }
+
 	lang = lang.includes('-') ? lang : lang + '-' + lang
 
-	let decode = (s: string): string => s
-
 	const url = API_LIST.bing.replace('%q', q).replace('%l', lang)
-	const text = (await requestProviderAPI(url).text()) ?? ''
+	const json = await requestProviderAPI(url).json<Bing>()
 	const result: Suggestions = []
 
-	const elements = text.split('<li class="')
-	elements.shift()
+	if (!json) {
+		return []
+	}
 
-	for (const el of elements) {
-		const isPresentation = el.indexOf('src="') > 0
-		let text = ''
-		let desc
-		let image
-
-		if (isPresentation) {
-			const imgstart = el.indexOf('src="') + 5
-			const imgend = el.indexOf('" role=', imgstart)
-			const descstart = el.indexOf('data-appLinkHookId="demoteText">')
-
-			if (descstart > 0) {
-				const descend = el.indexOf('</span>', descstart + 32)
-				desc = decode(el.slice(descstart + 32, descend))
-			}
-
-			const startstr = descstart > 0 ? 'pp_title">' : 'pp_title pp_titleOnly">'
-			const txtstart = el.indexOf(startstr) + startstr.length
-			const txtend = el.indexOf('</div>', txtstart)
-
-			text = el.slice(txtstart, txtend)
-			image = el.slice(imgstart, imgend)
-
-			// cloudflare removes domains when fetching html
-			if (image.startsWith('https://th.bing.com') === false) {
-				image = 'https://th.bing.com' + image
-			}
-		} else {
-			const start = el.indexOf('sa_tm_text">') + 12
-			const end = el.indexOf('</span>', start)
-			text = el.slice(start, end)
-		}
-
-		text = decode(text)
-		text = text.replaceAll('<strong>', '')
-		text = text.replaceAll('</strong>', '')
-
-		result.push({ text, desc, image })
+	for (const item of Object.values(json.s)) {
+		result.push({
+			text: item.q,
+			desc: item.ext ? item.ext?.des : undefined,
+			image: item.ext ? 'https://th.bing.com' + item.ext?.im : undefined,
+		})
 	}
 
 	return result
