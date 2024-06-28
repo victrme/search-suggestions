@@ -20,7 +20,8 @@ const API_LIST = {
 
 const headers = {
 	'Accept-Language': 'en-US,en;q=1',
-	'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:109.0) Gecko/20100101 Firefox/114.0',
+	'User-Agent':
+		'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:109.0) Gecko/20100101 Firefox/114.0',
 }
 
 export default async function handler(args = ARGS): Promise<Suggestions> {
@@ -86,7 +87,9 @@ function requestProviderAPI(url: string) {
 
 async function google(q: string, lang: string): Promise<Suggestions> {
 	type GoogleDefinition = { l: { il: { t: { t: string }[] } }[] }
-	type GoogleAPI = [[[string, number, number[], { zi: string; zs: string; ansa: GoogleDefinition }]]]
+	type GoogleAPI = [
+		[[string, number, number[], { zi: string; zs: string; ansa: GoogleDefinition }]],
+	]
 
 	const url = API_LIST.google.replace('%q', q).replace('%l', lang)
 	let text = (await requestProviderAPI(url).text()) ?? ''
@@ -101,7 +104,10 @@ async function google(q: string, lang: string): Promise<Suggestions> {
 			return json[0].map((item) => {
 				const wordDefinition = item[3]?.ansa?.l[1]?.il?.t[0]?.t // bruh
 
-				const text = item[0].replaceAll('<b>', '').replaceAll('</b>', '').replaceAll('&#39;', "'")
+				const text = item[0]
+					.replaceAll('<b>', '')
+					.replaceAll('</b>', '')
+					.replaceAll('&#39;', "'")
 				const desc = (wordDefinition ?? item[3]?.zi ?? '').replaceAll('&#39;', "'")
 				const image = item[3]?.zs
 
@@ -131,7 +137,7 @@ async function bing(q: string, lang: string): Promise<Suggestions> {
 
 	for (const item of Object.values(json.s)) {
 		result.push({
-			text: item.q,
+			text: item.q.replace('\ue000', '').replace('\ue001', ''),
 			desc: item.ext ? item.ext?.des : undefined,
 			image: item.ext ? 'https://th.bing.com' + item.ext?.im : undefined,
 		})
