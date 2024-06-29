@@ -72,7 +72,7 @@ function createWebsocket() {
 				console.error(error)
 				server.send('{error: ' + error + '}')
 			}
-		}, 150)
+		}, 150),
 	)
 
 	return new Response(null, {
