@@ -1,4 +1,4 @@
 name = "suggestions"
-main = "src/index.ts"
+main = "worker.ts"
 compatibility_date = "2023-11-21"
 minify = true

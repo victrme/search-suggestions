@@ -1,4 +1,4 @@
-import handler from '../../src'
+import handler from '../src'
 
 export default {
 	async fetch(request: Request) {

@@ -1,6 +1,0 @@
-[dev]
-  autoLaunch = false
-
-[[edge_functions]]
-  path = "/"
-  function = "index"

@@ -1,9 +1,0 @@
-{
-	"name": "netlify",
-	"private": true,
-	"type": "module",
-	"scripts": {
-		"deploy": "netlify deploy",
-		"dev": "netlify dev"
-	}
-}
