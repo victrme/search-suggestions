@@ -1,7 +1,7 @@
 {
 	"name": "@victr/suggestions",
 	"description": "Gets search suggestions from a number of search engines",
-	"version": "0.3.3",
+	"version": "0.4.3",
 	"author": "Victor Azevedo",
 	"license": "MIT",
 	"scripts": {
@@ -11,8 +11,8 @@
 		"netlify:dev": "netlify dev --filter netlify"
 	},
 	"devDependencies": {
-		"typescript": "^5.5.2",
-		"vitest": "^1.6.0"
+		"typescript": "^5.6.2",
+		"vitest": "^2.1.1"
 	},
 	"files": [
 		"/dist"
