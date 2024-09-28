@@ -13,6 +13,7 @@ const ARGS = {
 const API_LIST = {
 	bing: 'https://www.bing.com/AS/Suggestions?qry=%q&mkt=%l&cp=5&csr=1&msbqf=false&cvid=7AE3B40123C74FFF87EF8A5ED4FAF455',
 	google: 'https://www.google.com/complete/search?q=%q&hl=%l&client=gws-wiz',
+	brave: 'https://search.brave.com/api/suggest?q=%q&rich=true',
 	qwant: 'https://api.qwant.com/v3/suggest?q=%q&locale=%l',
 	duckduckgo: 'https://duckduckgo.com/ac/?q=%q&kl=%l',
 	yahoo: 'https://search.yahoo.com/sugg/gossip/gossip-us-fastbreak/?command=%q&output=sd1',
@@ -48,6 +49,10 @@ export default async function handler(args = ARGS): Promise<Suggestions> {
 			result = await duckduckgo(q, lang)
 			break
 
+		case 'brave':
+			result = await brave(q)
+			break
+
 		case 'qwant':
 			result = await qwant(q, lang)
 			break
@@ -64,26 +69,27 @@ export default async function handler(args = ARGS): Promise<Suggestions> {
 	return result
 }
 
-function requestProviderAPI(url: string) {
+async function requestProviderAPI<API>(url: string): Promise<API | undefined> {
 	const r = fetch(url, { headers })
 
-	return {
-		json: async <API>(): Promise<API | undefined> => {
-			try {
-				return (await (await r).json()) as API
-			} catch (_) {
-				console.warn("Can't parse JSON")
-			}
-		},
-		text: async (): Promise<string | undefined> => {
-			try {
-				return await (await r).text()
-			} catch (_) {
-				console.warn("Can't parse to text")
-			}
-		},
+	try {
+		return (await (await r).json()) as API
+	} catch (_) {
+		console.warn("Can't parse JSON")
 	}
 }
+
+async function requestProviderAPIAsText(url: string): Promise<string | undefined> {
+	const r = fetch(url, { headers })
+
+	try {
+		return await (await r).text()
+	} catch (_) {
+		console.warn("Can't parse to text")
+	}
+}
+
+// Providers
 
 async function google(q: string, lang: string): Promise<Suggestions> {
 	type GoogleDefinition = { l: { il: { t: { t: string }[] } }[] }
@@ -92,7 +98,7 @@ async function google(q: string, lang: string): Promise<Suggestions> {
 	]
 
 	const url = API_LIST.google.replace('%q', q).replace('%l', lang)
-	let text = (await requestProviderAPI(url).text()) ?? ''
+	let text = (await requestProviderAPIAsText(url)) ?? ''
 	let json: GoogleAPI
 
 	try {
@@ -122,13 +128,22 @@ async function google(q: string, lang: string): Promise<Suggestions> {
 }
 
 async function bing(q: string, lang: string): Promise<Suggestions> {
-	type BingSuggestions = { q: string; u: string; ext?: { des: string; im: string; t: string } }
+	type BingSuggestions = {
+		q: string
+		u: string
+		ext?: {
+			des: string
+			im: string
+			t: string
+		}
+	}
+
 	type Bing = { s: BingSuggestions[] }
 
 	lang = lang.includes('-') ? lang : lang + '-' + lang
 
 	const url = API_LIST.bing.replace('%q', q).replace('%l', lang)
-	const json = await requestProviderAPI(url).json<Bing>()
+	const json = await requestProviderAPI<Bing>(url)
 	const result: Suggestions = []
 
 	if (!json) {
@@ -158,7 +173,7 @@ async function qwant(q: string, lang: string): Promise<Suggestions> {
 	lang = lang === 'fr' ? 'fr' : 'en_US'
 
 	const url = API_LIST.qwant.replace('%q', q).replace('%l', lang)
-	const json = await requestProviderAPI(url).json<QwantAPI>()
+	const json = await requestProviderAPI<QwantAPI>(url)
 
 	if (json && json.status === 'success') {
 		return json.data.items.map((item) => ({ text: item.value }))
@@ -168,10 +183,12 @@ async function qwant(q: string, lang: string): Promise<Suggestions> {
 }
 
 async function duckduckgo(q: string, lang: string): Promise<Suggestions> {
-	type DuckduckgoAPI = { phrase: string }[]
+	type DuckduckgoAPI = {
+		phrase: string
+	}[]
 
 	const url = API_LIST.duckduckgo.replace('%q', q).replace('%l', lang)
-	const json = await requestProviderAPI(url).json<DuckduckgoAPI>()
+	const json = await requestProviderAPI<DuckduckgoAPI>(url)
 
 	if (json) {
 		return Object.values(json).map((item) => ({ text: item.phrase }))
@@ -182,15 +199,44 @@ async function duckduckgo(q: string, lang: string): Promise<Suggestions> {
 
 async function yahoo(q: string): Promise<Suggestions> {
 	type YahooAPI = {
-		r: { k: string; fd?: { imageUrl: string } }[]
+		r: {
+			k: string
+			fd?: {
+				imageUrl: string
+			}
+		}[]
 	}
 
-	const json = await requestProviderAPI(API_LIST.yahoo.replace('%q', q)).json<YahooAPI>()
+	const json = await requestProviderAPI<YahooAPI>(API_LIST.yahoo.replace('%q', q))
 
 	if (json) {
 		return json.r.map((item) => ({
 			text: item.k,
 			image: item.fd?.imageUrl,
+		}))
+	}
+
+	return []
+}
+
+async function brave(q: string): Promise<Suggestions> {
+	type BraveSearchAPI = [
+		string,
+		{
+			q: string
+			name?: string
+			desc?: string
+			img?: string
+		}[],
+	]
+
+	const json = await requestProviderAPI<BraveSearchAPI>(API_LIST.brave.replace('%q', q))
+
+	if (json) {
+		return json[1]?.map((item) => ({
+			text: item.q,
+			desc: item.desc,
+			image: item.img,
 		}))
 	}
 

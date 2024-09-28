@@ -7,7 +7,7 @@ type Suggestions = {
 	image?: string
 }[]
 
-const providers = ['google', 'bing', 'yahoo', 'duckduckgo', 'qwant']
+const providers = ['google', 'bing', 'yahoo', 'duckduckgo', 'qwant', 'brave']
 
 function testPresentation(response: Suggestions) {
 	const presentations = Object.values(response).filter((el) => el.image)
@@ -63,6 +63,11 @@ describe('Providers', () => {
 
 	test('Qwant', async () => {
 		const response = await handler({ q: 'hello', with: 'qwant', lang: '' })
+		testResponse(response)
+	})
+
+	test('Brave', async () => {
+		const response = await handler({ q: 'hello', with: 'brave', lang: '' })
 		testResponse(response)
 	})
 })
