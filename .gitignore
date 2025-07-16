@@ -1,7 +1,5 @@
 .env
 .netlify
 .wrangler
-.vscode
-target
 node_modules
-dist
+.vscode

@@ -1,0 +1,22 @@
+{
+	"tasks": {
+		"dev": "npx wrangler dev"
+	},
+	"fmt": {
+		"indentWidth": 4,
+		"useTabs": true,
+		"semiColons": false,
+		"singleQuote": true,
+		"lineWidth": 144
+	},
+	"lint": {
+		"rules": {
+			"tags": ["recommended"]
+		}
+	},
+	"imports": {
+		"@cloudflare/workers-types": "npm:@cloudflare/workers-types@^4.20250715.0",
+		"@std/assert": "jsr:@std/assert@1",
+		"@std/expect": "jsr:@std/expect@1"
+	}
+}

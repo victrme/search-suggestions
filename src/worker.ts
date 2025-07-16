@@ -1,4 +1,5 @@
-import handler from '../src'
+import handler from './index.ts'
+import type {} from '@cloudflare/workers-types'
 
 export default {
 	async fetch(request: Request) {
@@ -41,7 +42,6 @@ function createWebsocket() {
 	const webSocketPair = new WebSocketPair()
 	const [client, server] = Object.values(webSocketPair)
 
-	//@ts-ignore
 	server.accept()
 
 	server.addEventListener(
@@ -81,7 +81,7 @@ function createWebsocket() {
 	})
 }
 
-function debounce(callback: Function, delay: number) {
+function debounce(callback: (...args: unknown[]) => unknown, delay: number) {
 	let timer = 0
 
 	return function (...args: unknown[]) {
