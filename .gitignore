@@ -1,5 +1,3 @@
-.env
-.netlify
-.wrangler
 node_modules
+.wrangler
 .vscode
