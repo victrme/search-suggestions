@@ -1,6 +1,8 @@
 {
 	"tasks": {
-		"dev": "npx wrangler dev"
+		"dev": "npx wrangler dev",
+		"test": "deno test --allow-net",
+		"deploy": "npx wrangler deploy"
 	},
 	"fmt": {
 		"indentWidth": 4,
