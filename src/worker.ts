@@ -46,7 +46,9 @@ function createWebsocket() {
 
 	server.addEventListener(
 		'message',
-		debounce((ev: MessageEvent) => {
+		debounce((e) => {
+			const event = e as MessageEvent
+
 			if (subRequestCount++ === 50) {
 				subRequestCount = 0
 				server.send(JSON.stringify({ error: 'subrequest limit reached' }))
@@ -55,7 +57,7 @@ function createWebsocket() {
 			}
 
 			try {
-				const data = JSON.parse(ev.data.toString() ?? '{}')
+				const data = JSON.parse(event.data.toString() ?? '{}')
 
 				const response = handler({
 					q: data.q ?? '',
@@ -66,8 +68,6 @@ function createWebsocket() {
 				response.then((response) => {
 					server.send(JSON.stringify(response))
 				})
-
-				//
 			} catch (error) {
 				console.error(error)
 				server.send('{error: ' + error + '}')
@@ -76,8 +76,10 @@ function createWebsocket() {
 	)
 
 	return new Response(null, {
-		status: 101,
+		//@ts-ignore -> 'webSocket' does not exist in type 'ResponseInit'
+		//			 -> Cloudflare workers handles websocket but not in types ?
 		webSocket: client,
+		status: 101,
 	})
 }
 
