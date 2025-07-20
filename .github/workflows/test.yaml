@@ -3,7 +3,7 @@ name: Run tests
 on:
     push:
         branches:
-            - use-deno
+            - main
 
 jobs:
     test:
