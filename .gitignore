@@ -1,7 +1,3 @@
-.env
-.netlify
+node_modules
 .wrangler
 .vscode
-target
-node_modules
-dist

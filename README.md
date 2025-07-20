@@ -92,26 +92,28 @@ GET /?with=google&q=vercel&l=fr
 ]
 ```
 
-## Install
+## Development
 
-First clone this repository.
-
-### Netlify
-
-```bash
-npm install netlify-cli -g
-
-# On port 8888
-netlify dev
-```
-
-### Cloudflare Workers
+- Install [Deno](https://deno.com/)
+- Install [NodeJS](https://nodejs.org/en/download)
+- Make sure npx is installed with `npx -v`
 
 ```bash
-npm install wrangler -g
+npx -v
+# 10.9.2
 
-# On port 8787
-wrangler dev
+deno install
+# ...
+
+deno task test
+# Task test deno test --allow-net
+# ok | 11 passed | 0 failed (2s)
+
+deno task dev
+# Task dev npx wrangler dev
+# Need to install the following packages
+# ...
+# [wrangler:info] Ready on http://localhost:8787
 
 wrangler deploy
 ```

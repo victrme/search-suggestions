@@ -1,4 +1,5 @@
-import handler from '../src'
+import handler from './index.ts'
+import type {} from '@cloudflare/workers-types'
 
 export default {
 	async fetch(request: Request) {
@@ -41,12 +42,13 @@ function createWebsocket() {
 	const webSocketPair = new WebSocketPair()
 	const [client, server] = Object.values(webSocketPair)
 
-	//@ts-ignore
 	server.accept()
 
 	server.addEventListener(
 		'message',
-		debounce((ev: MessageEvent) => {
+		debounce((e) => {
+			const event = e as MessageEvent
+
 			if (subRequestCount++ === 50) {
 				subRequestCount = 0
 				server.send(JSON.stringify({ error: 'subrequest limit reached' }))
@@ -55,7 +57,7 @@ function createWebsocket() {
 			}
 
 			try {
-				const data = JSON.parse(ev.data.toString() ?? '{}')
+				const data = JSON.parse(event.data.toString() ?? '{}')
 
 				const response = handler({
 					q: data.q ?? '',
@@ -66,8 +68,6 @@ function createWebsocket() {
 				response.then((response) => {
 					server.send(JSON.stringify(response))
 				})
-
-				//
 			} catch (error) {
 				console.error(error)
 				server.send('{error: ' + error + '}')
@@ -76,12 +76,14 @@ function createWebsocket() {
 	)
 
 	return new Response(null, {
-		status: 101,
+		//@ts-ignore -> 'webSocket' does not exist in type 'ResponseInit'
+		//			 -> Cloudflare workers handles websocket but not in types ?
 		webSocket: client,
+		status: 101,
 	})
 }
 
-function debounce(callback: Function, delay: number) {
+function debounce(callback: (...args: unknown[]) => unknown, delay: number) {
 	let timer = 0
 
 	return function (...args: unknown[]) {
